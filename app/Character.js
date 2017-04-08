@@ -1,10 +1,9 @@
 import {Effect} from "./Effect";
 import {Sprite} from "./Sprite";
 
-export class Entity {
+export class Character {
     constructor(world, x, y, sprite) {
         this.world = world;
-        this.limite = world.limite;
         this.context = world.context;
         this.position = {
             x: x,
@@ -30,28 +29,28 @@ export class Entity {
         this.canMove = true;
         this.collision = false;
         this.validation = false;
-        this.world.sounds.appearance.url.play();
-        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.resources.explosion));
+        this.world.sounds['appearance'].audio.play();
+        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.resources['explosion']));
     }
 
     control() {
         if (!this.transition.state && this.canMove) {
             if (this.world.buttons[38]) {
-                this.diriger("up");
+                this.navigate("up");
             }
             if (this.world.buttons[39]) {
-                this.diriger("right");
+                this.navigate("right");
             }
             if (this.world.buttons[37]) {
-                this.diriger("left");
+                this.navigate("left");
             }
             if (this.world.buttons[40]) {
-                this.diriger("down");
+                this.navigate("down");
             }
         }
     }
 
-    diriger(direction) {
+    navigate(direction) {
         let movement = {};
         switch (direction) {
             case "left":
@@ -74,8 +73,8 @@ export class Entity {
         if (!this.transition.state) {
             this.targetTile = this.world.infoClef(coordinates.x, coordinates.y);
             if (!this.targetTile.collision) {
-                if (this.targetTile.action === "ice") {
-                    this.transition.style = "ice";
+                if (this.targetTile.action === "slide") {
+                    this.transition.style = "slide";
                     this.transition.duration = 80;
                 } else {
                     this.transition.style = "walk";
@@ -113,45 +112,45 @@ export class Entity {
                 this.spriteSheet.position.y = this.target.y;
                 this.currentLocation.x = this.target.x;
                 this.currentLocation.y = this.target.y;
-                // en fonction du type de sol
+                // Does different stuff depending on target tile type
                 switch (this.targetTile.action) {
-                    case "ice":
-                        this.diriger(this.lastDirection);
+                    case "slide":
+                        this.navigate(this.lastDirection);
                         this.canMove = this.collision;
                         break;
                     case "left":
-                        this.world.sounds.validation.url.play();
+                        this.world.sounds['validation'].audio.play();
                         this.canMove = false;
-                        this.diriger("left");
+                        this.navigate("left");
                         break;
-                    case "haut":
-                        this.world.sounds.validation.url.play();
+                    case "up":
+                        this.world.sounds['validation'].audio.play();
                         this.canMove = false;
-                        this.diriger("up");
+                        this.navigate("up");
                         break;
-                    case "bas":
-                        this.world.sounds.validation.url.play();
+                    case "down":
+                        this.world.sounds['validation'].audio.play();
                         this.canMove = false;
-                        this.diriger("down");
+                        this.navigate("down");
                         break;
                     case "right":
-                        this.world.sounds.validation.url.play();
+                        this.world.sounds['validation'].audio.play();
                         this.canMove = false;
-                        this.diriger("right");
+                        this.navigate("right");
                         break;
                     case "trap":
-                        this.world.sounds.landslide.url.play();
+                        this.world.sounds['landslide'].audio.play();
                         this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.resources['dust']));
-                        this.world.terrain.geometry[this.position.y][this.position.x] = 7;
+                        this.world.board.cells[this.position.y][this.position.x] = 7;
                         this.canMove = true;
                         break;
-                    case "suivant":
+                    case "nextLevel":
                         this.validation = true;
                         this.canMove = true;
-                        this.world.action("suivant");
+                        this.world.action("nextLevel");
                         break;
                     default:
-                        this.world.sounds.movement.url.play();
+                        this.world.sounds['movement'].audio.play();
                         this.canMove = true;
                         this.validation = false;
                     // sol normal

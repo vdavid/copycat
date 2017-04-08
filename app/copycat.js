@@ -49,16 +49,16 @@ let settings = {
         {type: "tile", name: "water", id: 0, collision: true, apparence: "auto", rowIndex: 3},
         {type: "tile", name: "grass", id: 1, collision: false, apparence: 1},
         {type: "tile", name: "wall", id: 2, collision: true, apparence: "auto", rowIndex: 1},
-        {type: "tile", name: "ice", action: "ice", id: 3, collision: false, apparence: "auto", rowIndex: 2},
-        {type: "sprite", name: "suivant", id: 4, collision: false, action: "suivant", apparence: "exit", rowIndex: 2, allure: 0.3},
+        {type: "tile", name: "ice", action: "slide", id: 3, collision: false, apparence: "auto", rowIndex: 2},
+        {type: "sprite", name: "nextLevel", id: 4, collision: false, action: "nextLevel", apparence: "exit", rowIndex: 2, allure: 0.3},
         {type: "tile", name: "player", id: 5, collision: false, apparence: 5},
         {type: "tile", name: "trap", action: "trap", id: 6, collision: false, apparence: 6},
         {type: "tile", name: "hole", id: 7, collision: true, apparence: 7},
         {type: "tile", name: "fence", id: 8, collision: true, apparence: "auto", rowIndex: 4},
         {type: "tile", name: "leftArrow", action: "left", id: 9, collision: false, apparence: 9},
-        {type: "tile", name: "upArrow", action: "haut", id: 10, collision: false, apparence: 10},
+        {type: "tile", name: "upArrow", action: "up", id: 10, collision: false, apparence: 10},
         {type: "tile", name: "rightArrow", action: "right", id: 11, collision: false, apparence: 11},
-        {type: "tile", name: "downArrow", action: "bas", id: 12, collision: false, apparence: 12}
+        {type: "tile", name: "downArrow", action: "down", id: 12, collision: false, apparence: 12}
     ],
 
 };

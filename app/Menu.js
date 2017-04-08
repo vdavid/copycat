@@ -21,17 +21,17 @@ export class Menu {
     change(keyCode) {
         if (keyCode === 38 && this.selection > 0) {
             // up
-            this.parent.sounds.selection.url.play();
+            this.parent.sounds['selection'].audio.play();
             this.selection -= 1;
             this.render();
         } else if (keyCode === 40 && this.selection < this.max) {
             // down
-            this.parent.sounds.selection.url.play();
+            this.parent.sounds['selection'].audio.play();
             this.selection += 1;
             this.render();
         } else if (keyCode === 88) {
             // select
-            this.parent.sounds.validation.url.play();
+            this.parent.sounds['validation'].audio.play();
             this.parent.phase(this.choice[this.selection].lien);
         }
     }

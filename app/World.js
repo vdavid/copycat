@@ -1,5 +1,5 @@
 import {Menu} from "./Menu";
-import {Entity} from "./Entity";
+import {Character} from "./Character";
 import {ArrayChunker} from "./ArrayChunker";
 
 export class World {
@@ -15,8 +15,8 @@ export class World {
         this.fps = 60;
         // resources
         this.prop = {
-            compte: 0,
-            imageCount: settings.spriteSheets.length + settings.sounds.length
+            counter: 0,
+            resourceCount: settings.spriteSheets.length + settings.sounds.length
         };
         this.resources = {};
         // volume
@@ -29,15 +29,13 @@ export class World {
         // levels
         this.levels = levels;
         this.currentLevel = 0;
-        // on recupere la derniere sauvegarde
-        if (localStorage['copycat']) {
-            console.info('State loaded from memory.');
-            this.lastLevel = JSON.parse(localStorage['copycat']);
-        } else {
-            // s'il n'y a rien on genere une mémoire
-            localStorage.setItem("copycat", JSON.stringify(5));
-            this.lastLevel = JSON.parse(localStorage['copycat']);
+
+
+        if (!localStorage['copycat']) {
+            localStorage.setItem("copycat", JSON.stringify(5)); // Default "Last level" is 5.
         }
+        // Recovers last save
+        this.lastLevel = JSON.parse(localStorage['copycat']);
         this.cat = [];
         // Menu levels
         let self = this;
@@ -63,26 +61,26 @@ export class World {
             },
             change: function (keyCode) {
                 if (keyCode === 38 && this.selection - 6 > 0) {
-                    // haut
-                    this.world.sounds.selection.url.play();
+                    // up
+                    this.world.sounds.selection.audio.play();
                     this.selection -= 7;
                     this.render();
                 }
                 if (keyCode === 40 && this.selection + 7 < this.world.lastLevel) {
-                    // bas
-                    this.world.sounds.selection.url.play();
+                    // down
+                    this.world.sounds.selection.audio.play();
                     this.selection += 7;
                     this.render();
                 }
                 if (keyCode === 37 && this.selection > 0) {
                     // left
-                    this.world.sounds.selection.url.play();
+                    this.world.sounds.selection.audio.play();
                     this.selection -= 1;
                     this.render();
                 }
                 if (keyCode === 39 && this.selection + 1 < this.world.lastLevel) {
-                    // droit
-                    this.world.sounds.selection.url.play();
+                    // right
+                    this.world.sounds.selection.audio.play();
                     this.selection += 1;
                     this.render();
                 }
@@ -100,10 +98,6 @@ export class World {
         this.context = this.canvas.getContext('2d');
         this.width = this.canvas.width = 16 * 16;
         this.height = this.canvas.height = 16 * 16;
-        this.limite = {
-            x: this.width,
-            y: this.height
-        };
         this.canvas.style.width = this.width * this.zoom + "px";
         this.canvas.style.height = this.height * this.zoom + "px";
         this.context.msImageSmoothingEnabled = false;
@@ -113,9 +107,9 @@ export class World {
     }
 
     initialize() {
-        this.prop.compte += 1;
-        if (this.prop.compte === this.prop.imageCount) {
-            console.log('%c resources are loaded ' + this.prop.imageCount + " of " + this.prop.imageCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
+        this.prop.counter += 1;
+        if (this.prop.counter === this.prop.resourceCount) {
+            console.log('%c resources are loaded ' + this.prop.resourceCount + " of " + this.prop.resourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
             // menu
             let buttons = [{
                 name: "start game",
@@ -140,7 +134,7 @@ export class World {
             this.context.fillStyle = "#000";
             this.context.fillRect(0, 0, this.width, this.height);
             this.context.fillStyle = "#fff";
-            this.context.fillRect(0, (this.height / 2) - 1, (this.prop.compte * this.width) / this.prop.imageCount, 2);
+            this.context.fillRect(0, (this.height / 2) - 1, (this.prop.counter * this.width) / this.prop.resourceCount, 2);
         }
     }
 
@@ -154,7 +148,7 @@ export class World {
         return img;
     }
 
-    playSound(url) {
+    loadAudio(url) {
         //noinspection JSUnresolvedFunction
         let audio = new Audio(url);
         audio.addEventListener('canplaythrough', this.initialize(), false);
@@ -173,10 +167,8 @@ export class World {
         // traitement images
         let IS = {};
         for (let i = 0; i < sounds.length; i++) {
-            let sujet = sounds[i];
-            let name = sujet.name;
-            sujet.url = this.playSound(sounds[i].url);
-            IS[name] = sounds[i];
+            sounds[i].audio = this.loadAudio(sounds[i].url);
+            IS[sounds[i].name] = sounds[i];
         }
         this.sounds = IS;
         //  Key processing
@@ -189,7 +181,7 @@ export class World {
                 keys[i].spriteSheet = this.resources[keys[i].apparence];
                 keys[i].memoireBoucle = false;
                 keys[i].canAnimate = true;
-                keys[i].boucle = true;
+                keys[i].isAnimated = true;
             }
             CM[name] = keys[i];
         }
@@ -208,11 +200,11 @@ export class World {
                 break;
             case "start":
                 if (this.buttons[69] && this.animation) {
-                    this.sounds.validation.url.play();
+                    this.sounds.validation.audio.play();
                     this.phase("menu")
                 }
                 if (this.buttons[82] && this.animation) {
-                    this.sounds.validation.url.play();
+                    this.sounds.validation.audio.play();
                     cancelAnimationFrame(this.animation);
                     this.animation = null;
                     this.isStopped = true;
@@ -221,26 +213,26 @@ export class World {
                 break;
             case "fin":
                 if (this.buttons[67]) {
-                    this.sounds.validation.url.play();
+                    this.sounds.validation.audio.play();
                     this.phase("menu")
                 }
                 break;
             case "rules":
                 if (this.buttons[67]) {
-                    this.sounds.validation.url.play();
+                    this.sounds.validation.audio.play();
                     this.phase("menu")
                 }
                 break;
             case "info":
                 if (this.buttons[67]) {
-                    this.sounds.validation.url.play();
+                    this.sounds.validation.audio.play();
                     this.phase("menu")
                 }
                 break;
             case "levels":
                 this.menuLevels.change(event.keyCode);
                 if (this.buttons[67]) {
-                    this.sounds.validation.url.play();
+                    this.sounds.validation.audio.play();
                     this.phase("menu")
                 }
                 if (this.buttons[88]) {
@@ -284,9 +276,9 @@ export class World {
      */
     findKey(keyToFind) {
         let blockRecherche = [];
-        for (let j = 0; j < this.terrain.dimension.y; j++) {
-            for (let i = 0; i < this.terrain.dimension.x; i++) {
-                let id = this.terrain.geometry[j][i];
+        for (let j = 0; j < this.board.size.height; j++) {
+            for (let i = 0; i < this.board.size.width; i++) {
+                let id = this.board.cells[j][i];
                 if (this.keys[id].name === keyToFind) {
                     let info = {
                         position: {
@@ -302,19 +294,19 @@ export class World {
     }
 
     infoClef(x, y) {
-        if (x > -1 && x < this.terrain.dimension.x && y > -1 && y < this.terrain.dimension.y) {
-            return this.keys[this.terrain.geometry[y][x]];
+        if (x > -1 && x < this.board.size.width && y > -1 && y < this.board.size.height) {
+            return this.keys[this.board.cells[y][x]];
         } else {
             return false;
         }
     }
 
-    write(texte, x, y) {
+    write(text, x, y) {
         let width = 6;
         let height = 9;
-        let centre = (texte.length * width) / 2;
-        for (let i = 0; i < texte.length; i++) {
-            let index = this.alphabet.indexOf(texte.charAt(i)),
+        let centre = (text.length * width) / 2;
+        for (let i = 0; i < text.length; i++) {
+            let index = this.alphabet.indexOf(text.charAt(i)),
                 clipX = width * index,
                 posX = (x - centre) + (i * width);
             this.context.drawImage(this.resources['pixelFont'].img, clipX, 0, width, height, posX, y, width, height);
@@ -347,36 +339,35 @@ export class World {
     }
 
     bitMasking() {
-        //let tileBitMask = [];
-        this.terrain.apparence = [];
-        for (let j = 0; j < this.terrain.dimension.y; j++) {
-            for (let i = 0; i < this.terrain.dimension.x; i++) {
-                let id = this.terrain.geometry[j][i];
-                // haut left droit bas
+        this.board.apparence = [];
+        for (let j = 0; j < this.board.size.height; j++) {
+            for (let i = 0; i < this.board.size.width; i++) {
+                let id = this.board.cells[j][i];
+                // up left right down
                 let neighbor = [0, 0, 0, 0];
                 if (j - 1 > -1) {
-                    if (id === this.terrain.geometry[j - 1][i]) {
+                    if (id === this.board.cells[j - 1][i]) {
                         neighbor[0] = 1; //up
                     }
                 } else {
                     neighbor[0] = 1;
                 }
                 if (i - 1 > -1) {
-                    if (id === this.terrain.geometry[j][i - 1]) {
+                    if (id === this.board.cells[j][i - 1]) {
                         neighbor[1] = 1; // left
                     }
                 } else {
                     neighbor[1] = 1;
                 }
-                if (i + 1 < this.terrain.dimension.x) {
-                    if (id === this.terrain.geometry[j][i + 1]) {
+                if (i + 1 < this.board.size.width) {
+                    if (id === this.board.cells[j][i + 1]) {
                         neighbor[2] = 1; // right
                     }
                 } else {
                     neighbor[2] = 1;
                 }
-                if (j + 1 < this.terrain.dimension.y) {
-                    if (id === this.terrain.geometry[j + 1][i]) {
+                if (j + 1 < this.board.size.height) {
+                    if (id === this.board.cells[j + 1][i]) {
                         neighbor[3] = 1; // down
                     }
                 } else {
@@ -384,21 +375,21 @@ export class World {
                 }
                 //noinspection PointlessArithmeticExpressionJS
                 id = 1 * neighbor[0] + 2 * neighbor[1] + 4 * neighbor[2] + 8 * neighbor[3];
-                this.terrain.apparence.push(id);
+                this.board.apparence.push(id);
             }
         }
-        this.terrain.apparence = ArrayChunker.chunkArray(this.terrain.apparence, this.terrain.dimension.x);
+        this.board.apparence = ArrayChunker.chunkArray(this.board.apparence, this.board.size.width);
     }
 
     renderTerrain() {
         let sourceX;
         let sourceY;
-        for (let j = 0; j < this.terrain.dimension.y; j++) {
-            for (let i = 0; i < this.terrain.dimension.x; i++) {
-                let id = this.terrain.geometry[j][i];
+        for (let j = 0; j < this.board.size.height; j++) {
+            for (let i = 0; i < this.board.size.width; i++) {
+                let id = this.board.cells[j][i];
                 if (this.keys[id].apparence === "auto") {
-                    sourceX = Math.floor(this.terrain.apparence[j][i]) * this.tileSize;
-                    sourceY = Math.floor(this.terrain.apparence[j][i]) * this.tileSize;
+                    sourceX = Math.floor(this.board.apparence[j][i]) * this.tileSize;
+                    sourceY = Math.floor(this.board.apparence[j][i]) * this.tileSize;
                     this.context.drawImage(this.resources['tiles'].img,
                         sourceX, this.keys[id].rowIndex * this.tileSize, this.tileSize, this.tileSize,
                         i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
@@ -408,7 +399,7 @@ export class World {
                             this.keys[id].frame += this.keys[id].allure;
                         }
                         if (this.keys[id].frame >= this.keys[id].spriteSheet.spriteCount) {
-                            if (!this.keys[id].boucle) {
+                            if (!this.keys[id].isAnimated) {
                                 this.keys[id].canAnimate = false;
                             }
                             this.keys[id].frame = 0;
@@ -448,14 +439,14 @@ export class World {
      |__/
      */
     initializeMap() {
-        this.terrain = {};
+        this.board = {};
         this.isStopped = false;
-        this.terrain.geometry = JSON.parse(JSON.stringify(this.levels[this.currentLevel].geometry));
-        this.terrain.dimension = {
-            x: this.terrain.geometry[0].length,
-            y: this.terrain.geometry.length
+        this.board.cells = JSON.parse(JSON.stringify(this.levels[this.currentLevel].cells));
+        this.board.size = {
+            width: this.board.cells[0].length,
+            height: this.board.cells.length
         };
-        this.terrain.apparence = [];
+        this.board.apparence = [];
         this.bitMasking();
     }
 
@@ -464,7 +455,7 @@ export class World {
         this.cat = [];
         let posCat = this.findKey("player");
         for (let i = 0; i < posCat.length; i++) {
-            this.cat.push(new Entity(this, posCat[i].position.x, posCat[i].position.y, this.resources['playerSprite']));
+            this.cat.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.resources['playerSprite']));
         }
     }
 
@@ -480,12 +471,12 @@ export class World {
         // afficher comment
     }
 
-    boucle() {
+    animate() {
         this.context.fillStyle = "black";
         this.context.fillRect(0, 0, this.width, this.height);
         this.render();
         if (!this.isStopped) {
-            this.animation = requestAnimationFrame(() => this.boucle());
+            this.animation = requestAnimationFrame(() => this.animate());
         }
     }
 
@@ -501,19 +492,19 @@ export class World {
         let currentX = 0;
         let world = this;
         this.transition.time = new Date();
-        boucle();
+        animate();
 
-        function boucle() {
+        function animate() {
             let time = new Date() - world.transition.time;
             if (time < world.transition.duration) {
                 world.context.fillRect(0, 0, world.width, x);
                 world.context.fillRect(0, world.height, world.width, x * -1);
                 x = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
-                requestAnimationFrame(boucle);
+                requestAnimationFrame(animate);
             } else {
                 if (world.currentLevel < world.levels.length) {
                     world.phase("start");
-                    cancelAnimationFrame(boucle);
+                    cancelAnimationFrame(animate);
                 } else {
                     // fin du jeu
                     world.isStopped = true;
@@ -531,9 +522,9 @@ export class World {
         let currentX = this.height / 2;
         let world = this;
         this.transition.time = new Date();
-        boucle();
+        animate();
 
-        function boucle() {
+        function animate() {
             let time = new Date() - world.transition.time;
             if (time < world.transition.duration) {
                 world.renderTerrain();
@@ -541,13 +532,13 @@ export class World {
                 world.context.fillRect(0, 0, world.width, x);
                 world.context.fillRect(0, world.height, world.width, x * -1);
                 x = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
-                requestAnimationFrame(boucle);
+                requestAnimationFrame(animate);
             } else {
 
                 world.initPlayer();
 
-                world.boucle();
-                cancelAnimationFrame(boucle);
+                world.animate();
+                cancelAnimationFrame(animate);
             }
         }
     }
@@ -584,7 +575,7 @@ export class World {
                 this.write("press 'c' to return to menu", this.width / 2, this.height - 30);
                 break;
             case "rules": // Displays rules
-                this.write("game control : ", this.width / 2, 15);
+                this.write("game control: ", this.width / 2, 15);
                 this.write("arrow keys to move", this.width / 2, 60);
                 this.write("'f' to toggle fullscreen", this.width / 2, 80);
                 this.write("'r' if you're stuck", this.width / 2, 100);
@@ -594,11 +585,11 @@ export class World {
                 this.write("press 'c' to return to menu", this.width / 2, this.height - 30);
                 break;
             case "info": // Displays infos
-                this.write("about : ", this.width / 2, 15);
+                this.write("about: ", this.width / 2, 15);
                 this.write("made with html5 canvas", this.width / 2, 40);
                 this.write("by gtibo on codepen", this.width / 2, 55);
                 this.write("credits:", this.width / 2, 80);
-                this.write("sound effect : noiseforfun.com", this.width / 2, 100);
+                this.write("sound effects: noiseforfun.com", this.width / 2, 100);
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);
                 this.write("press 'c' to return to menu", this.width / 2, this.height - 30);
@@ -617,7 +608,7 @@ export class World {
 
     action(action) {
         switch (action) {
-            case "suivant":
+            case "nextLevel":
                 let tab = [];
                 for (let i = 0; i < this.cat.length; i++) {
                     tab.push(this.cat[i].validation);
@@ -632,14 +623,14 @@ export class World {
                         localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
                     }
                     this.outro();
-                    this.sounds['bravo'].url.play();
+                    this.sounds['bravo'].audio.play();
                 }
 
                 break;
-            case "autre":
+            case "other":
                 break;
             default:
-                console.log("aucune action reconnue");
+                console.log("Invalid action");
         }
     }
 }
