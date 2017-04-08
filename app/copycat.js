@@ -37,14 +37,14 @@ let settings = {
         {url: "./resources/images/pattern.png", name: "pattern"},
         {url: "./resources/images/lock.png", name: "lock"}
     ],
-    sounds: [
-        {url: "./resources/sounds/NFF-select-04.wav", name: "movement"},
-        {url: "./resources/sounds/NFF-select.wav", name: "selection"},
-        {url: "./resources/sounds/NFF-bravo.wav", name: "bravo"},
-        {url: "./resources/sounds/NFF-click-switch.wav", name: "validation"},
-        {url: "./resources/sounds/NFF-bubble-input.wav", name: "appearance"},
-        {url: "./resources/sounds/NFF-moving-block.wav", name: "landslide"},
-    ],
+    // sounds: [
+    //     {url: "./resources/sounds/NFF-select-04.wav", name: "movement"},
+    //     {url: "./resources/sounds/NFF-select.wav", name: "selection"},
+    //     {url: "./resources/sounds/NFF-bravo.wav", name: "bravo"},
+    //     {url: "./resources/sounds/NFF-click-switch.wav", name: "validation"},
+    //     {url: "./resources/sounds/NFF-bubble-input.wav", name: "appearance"},
+    //     {url: "./resources/sounds/NFF-moving-block.wav", name: "landslide"},
+    // ],
     keys: [
         {type: "tile", name: "water", id: 0, collision: true, apparence: "auto", rowIndex: 3},
         {type: "tile", name: "grass", id: 1, collision: false, apparence: 1},

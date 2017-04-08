@@ -29,7 +29,7 @@ export class Character {
         this.canMove = true;
         this.collision = false;
         this.validation = false;
-        this.world.sounds['appearance'].audio.play();
+        this.world.soundBox.playAppearanceAudio();
         this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.resources['explosion']));
     }
 
@@ -119,27 +119,27 @@ export class Character {
                         this.canMove = this.collision;
                         break;
                     case "left":
-                        this.world.sounds['validation'].audio.play();
+                        this.world.soundBox.playValidationAudio();
                         this.canMove = false;
                         this.navigate("left");
                         break;
                     case "up":
-                        this.world.sounds['validation'].audio.play();
+                        this.world.soundBox.playValidationAudio();
                         this.canMove = false;
                         this.navigate("up");
                         break;
                     case "down":
-                        this.world.sounds['validation'].audio.play();
+                        this.world.soundBox.playValidationAudio();
                         this.canMove = false;
                         this.navigate("down");
                         break;
                     case "right":
-                        this.world.sounds['validation'].audio.play();
+                        this.world.soundBox.playValidationAudio();
                         this.canMove = false;
                         this.navigate("right");
                         break;
                     case "trap":
-                        this.world.sounds['landslide'].audio.play();
+                        this.world.soundBox.playLandslideAudio();
                         this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.resources['dust']));
                         this.world.board.cells[this.position.y][this.position.x] = 7;
                         this.canMove = true;
@@ -150,7 +150,7 @@ export class Character {
                         this.world.action("nextLevel");
                         break;
                     default:
-                        this.world.sounds['movement'].audio.play();
+                        this.world.soundBox.playMovementAudio();
                         this.canMove = true;
                         this.validation = false;
                     // sol normal

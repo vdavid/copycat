@@ -1,6 +1,7 @@
 import {Menu} from "./Menu";
 import {Character} from "./Character";
 import {ArrayChunker} from "./ArrayChunker";
+import {SoundBox} from "./SoundBox";
 
 export class World {
     constructor(settings, levels) {
@@ -14,18 +15,13 @@ export class World {
         // Frames per second
         this.fps = 60;
         // resources
-        this.prop = {
-            counter: 0,
-            resourceCount: settings.spriteSheets.length + settings.sounds.length
-        };
+        this.loadedResourceCount = 0;
+        this.soundBox = new SoundBox(0.05, () => { this.updateProgress(); });
+        this.totalResourceCount = settings.spriteSheets.length + SoundBox.getSupportedSoundCount();
         this.resources = {};
-        // volume
-        this.volumePrincipal = 0.05;
         // Initialization + loading
         this.createContext();
-        if (this.prop !== 0) {
-            this.loadResources(settings.spriteSheets, settings.sounds, settings.keys);
-        }
+        this.loadResources(settings.spriteSheets, settings.keys);
         // levels
         this.levels = levels;
         this.currentLevel = 0;
@@ -49,12 +45,11 @@ export class World {
                 this.world.drawFrame(10, 10, this.world.width - 20, 200 - 20);
                 this.world.write("select level", this.world.width / 2, 25);
                 for (let i = 0; i < this.count; i++) {
-                    let numero = i + 1;
                     if (i > this.world.lastLevel - 1) {
                         this.context.globalAlpha = 0.6;
                         this.world.context.drawImage(this.world.resources['lock'].img, (32 + Math.floor(i % 7) * 32) - this.world.resources['lock'].img.width / 2, (64 + Math.floor(i / 7) * 32) + 10);
                     }
-                    this.world.write(numero.toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
+                    this.world.write((i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
                 }
                 this.world.context.drawImage(this.world.resources.cursor.img, 0, 16, 32, 32, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32, 32, 32);
@@ -62,25 +57,25 @@ export class World {
             change: function (keyCode) {
                 if (keyCode === 38 && this.selection - 6 > 0) {
                     // up
-                    this.world.sounds.selection.audio.play();
+                    this.world.soundBox.playSelectionAudio();
                     this.selection -= 7;
                     this.render();
                 }
                 if (keyCode === 40 && this.selection + 7 < this.world.lastLevel) {
                     // down
-                    this.world.sounds.selection.audio.play();
+                    this.world.soundBox.playSelectionAudio();
                     this.selection += 7;
                     this.render();
                 }
                 if (keyCode === 37 && this.selection > 0) {
                     // left
-                    this.world.sounds.selection.audio.play();
+                    this.world.soundBox.playSelectionAudio();
                     this.selection -= 1;
                     this.render();
                 }
                 if (keyCode === 39 && this.selection + 1 < this.world.lastLevel) {
                     // right
-                    this.world.sounds.selection.audio.play();
+                    this.world.soundBox.playSelectionAudio();
                     this.selection += 1;
                     this.render();
                 }
@@ -106,10 +101,11 @@ export class World {
         console.log('%c World created ', 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
     }
 
-    initialize() {
-        this.prop.counter += 1;
-        if (this.prop.counter === this.prop.resourceCount) {
-            console.log('%c resources are loaded ' + this.prop.resourceCount + " of " + this.prop.resourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
+    updateProgress() {
+        this.loadedResourceCount += 1;
+        console.log('loaded');
+        if (this.loadedResourceCount === this.totalResourceCount) {
+            console.log('%c resources are loaded ' + this.loadedResourceCount + " of " + this.totalResourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
             // menu
             let buttons = [{
                 name: "start game",
@@ -134,7 +130,7 @@ export class World {
             this.context.fillStyle = "#000";
             this.context.fillRect(0, 0, this.width, this.height);
             this.context.fillStyle = "#fff";
-            this.context.fillRect(0, (this.height / 2) - 1, (this.prop.counter * this.width) / this.prop.resourceCount, 2);
+            this.context.fillRect(0, (this.height / 2) - 1, (this.loadedResourceCount * this.width) / this.totalResourceCount, 2);
         }
     }
 
@@ -142,21 +138,13 @@ export class World {
         let img = new Image();
         let self = this;
         img.onload = function () {
-            self.initialize();
+            self.updateProgress();
         };
         img.src = url;
         return img;
     }
 
-    loadAudio(url) {
-        //noinspection JSUnresolvedFunction
-        let audio = new Audio(url);
-        audio.addEventListener('canplaythrough', this.initialize(), false);
-        audio.volume = this.volumePrincipal;
-        return audio;
-    }
-
-    loadResources(spriteSheets, sounds, keys) {
+    loadResources(spriteSheets, keys) {
         // traitement images
         let images = {};
         for (let i = 0; i < spriteSheets.length; i++) {
@@ -164,13 +152,7 @@ export class World {
             images[spriteSheets[i].name] = spriteSheets[i];
         }
         this.resources = images;
-        // traitement images
-        let IS = {};
-        for (let i = 0; i < sounds.length; i++) {
-            sounds[i].audio = this.loadAudio(sounds[i].url);
-            IS[sounds[i].name] = sounds[i];
-        }
-        this.sounds = IS;
+
         //  Key processing
         this.nettoyer = new Array(keys.length).fill(false);
         let CM = {};
@@ -200,11 +182,11 @@ export class World {
                 break;
             case "start":
                 if (this.buttons[69] && this.animation) {
-                    this.sounds.validation.audio.play();
+                    this.soundBox.playValidationAudio();
                     this.phase("menu")
                 }
                 if (this.buttons[82] && this.animation) {
-                    this.sounds.validation.audio.play();
+                    this.soundBox.playValidationAudio();
                     cancelAnimationFrame(this.animation);
                     this.animation = null;
                     this.isStopped = true;
@@ -213,26 +195,26 @@ export class World {
                 break;
             case "fin":
                 if (this.buttons[67]) {
-                    this.sounds.validation.audio.play();
+                    this.soundBox.playValidationAudio();
                     this.phase("menu")
                 }
                 break;
             case "rules":
                 if (this.buttons[67]) {
-                    this.sounds.validation.audio.play();
+                    this.soundBox.playValidationAudio();
                     this.phase("menu")
                 }
                 break;
             case "info":
                 if (this.buttons[67]) {
-                    this.sounds.validation.audio.play();
+                    this.soundBox.playValidationAudio();
                     this.phase("menu")
                 }
                 break;
             case "levels":
                 this.menuLevels.change(event.keyCode);
                 if (this.buttons[67]) {
-                    this.sounds.validation.audio.play();
+                    this.soundBox.playValidationAudio();
                     this.phase("menu")
                 }
                 if (this.buttons[88]) {
@@ -623,7 +605,7 @@ export class World {
                         localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
                     }
                     this.outro();
-                    this.sounds['bravo'].audio.play();
+                    this.soundBox.playSuccessAudio();
                 }
 
                 break;
