@@ -3,11 +3,10 @@ export class Menu {
         this.parent = parent;
         this.context = parent.context;
         this.choice = choice;
-        this.pos = {
+        this.position = {
             x: x,
             y: y
         };
-        this.isActive = false;
         this.selection = 0;
         this.max = this.choice.length - 1;
         this.cursor = this.parent.resources.cursor;
@@ -33,7 +32,6 @@ export class Menu {
         } else if (keyCode === 88) {
             // select
             this.parent.sounds.validation.url.play();
-            this.isActive = false;
             this.parent.phase(this.choice[this.selection].lien);
         }
     }
@@ -43,13 +41,13 @@ export class Menu {
 
     render() {
         this.context.fillStyle = "#fff1e8";
-        // dessiner le cadre
-        this.parent.boite(this.pos.x - this.texteMax / 2, this.pos.y - 10, this.texteMax, 26 * this.choice.length);
-        // on affiche le titre
+        // Draws the frame
+        this.parent.drawFrame(this.position.x - this.texteMax / 2, this.position.y - 10, this.texteMax, 26 * this.choice.length);
+        // Displays the title
         for (let i = 0; i < this.choice.length; i++) {
-            this.parent.ecrire(this.choice[i].name, this.pos.x, this.pos.y + 25 * i);
+            this.parent.write(this.choice[i].name, this.position.x, this.position.y + 25 * i);
         }
         // on affiche la selection
-        this.context.drawImage(this.cursor.img, 48, 0, 16, 16, this.pos.x - this.texteMax / 2 + 8, this.pos.y + 25 * (this.selection) - 4, 16, 16);
+        this.context.drawImage(this.cursor.img, 48, 0, 16, 16, this.position.x - this.texteMax / 2 + 8, this.position.y + 25 * (this.selection) - 4, 16, 16);
     }
 }

@@ -1,107 +1,95 @@
-import {Effect} from './Effect';
-import {Sprite} from './Sprite';
+import {Effect} from "./Effect";
+import {Sprite} from "./Sprite";
 
 export class Entity {
     constructor(world, x, y, sprite) {
         this.world = world;
         this.limite = world.limite;
         this.context = world.context;
-        this.pos = {
+        this.position = {
             x: x,
             y: y
         };
-        this.size = world.size;
-        this.cible = {
-            x: this.pos.x * this.size,
-            y: this.pos.y * this.size,
+        this.tileSize = world.tileSize;
+        this.target = {
+            x: this.position.x * this.tileSize,
+            y: this.position.y * this.tileSize,
         };
-        this.depart = {
-            x: this.pos.x * this.size,
-            y: this.pos.y * this.size,
+        this.currentLocation = {
+            x: this.position.x * this.tileSize,
+            y: this.position.y * this.tileSize,
         };
-        this.sprite = new Sprite(this.world, this, sprite);
+        this.spriteSheet = new Sprite(this.world, this, sprite);
         this.transition = {
             state: false,
             time: null,
             duration: 200,
-            style: "marche"
+            style: "walk"
         };
-        this.derniereDirection = "none";
-        this.peutBouger = true;
+        this.lastDirection = "none";
+        this.canMove = true;
         this.collision = false;
         this.validation = false;
         this.world.sounds.appearance.url.play();
-        this.world.effets.push(new Effect(this.world, this.depart.x, this.depart.y, this.world.resources.explosion));
+        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.resources.explosion));
     }
 
-    controles() {
-        if (!this.transition.state && this.peutBouger) {
+    control() {
+        if (!this.transition.state && this.canMove) {
             if (this.world.buttons[38]) {
-                this.diriger("haut");
+                this.diriger("up");
             }
             if (this.world.buttons[39]) {
-                this.diriger("droite");
+                this.diriger("right");
             }
             if (this.world.buttons[37]) {
-                this.diriger("gauche");
+                this.diriger("left");
             }
             if (this.world.buttons[40]) {
-                this.diriger("bas");
+                this.diriger("down");
             }
         }
     }
 
     diriger(direction) {
-        let mouvement = {};
+        let movement = {};
         switch (direction) {
-            case "gauche":
-                mouvement = {
-                    x: this.pos.x - 1,
-                    y: this.pos.y
-                };
+            case "left":
+                movement = {x: this.position.x - 1, y: this.position.y};
                 break;
-            case "droite":
-                mouvement = {
-                    x: this.pos.x + 1,
-                    y: this.pos.y
-                };
+            case "right":
+                movement = {x: this.position.x + 1, y: this.position.y};
                 break;
-            case "bas":
-                mouvement = {
-                    x: this.pos.x,
-                    y: this.pos.y + 1
-                };
+            case "down":
+                movement = {x: this.position.x, y: this.position.y + 1};
                 break;
-            case "haut":
-                mouvement = {
-                    x: this.pos.x,
-                    y: this.pos.y - 1
-                };
+            case "up":
+                movement = {x: this.position.x, y: this.position.y - 1};
                 break;
         }
-        this.deplacer(mouvement, direction);
+        this.move(movement, direction);
     }
 
-    deplacer(coordonne, direction) {
+    move(coordinates, direction) {
         if (!this.transition.state) {
-            this.tuileCible = this.world.infoClef(coordonne.x, coordonne.y);
-            if (!this.tuileCible.collision) {
-                if (this.tuileCible.action === "glace") {
-                    this.transition.style = "glace";
+            this.targetTile = this.world.infoClef(coordinates.x, coordinates.y);
+            if (!this.targetTile.collision) {
+                if (this.targetTile.action === "ice") {
+                    this.transition.style = "ice";
                     this.transition.duration = 80;
                 } else {
-                    this.transition.style = "marche";
+                    this.transition.style = "walk";
                     this.transition.duration = 200;
                 }
                 this.collision = false;
                 this.validation = false;
                 this.transition.state = true;
-                this.derniereDirection = direction;
+                this.lastDirection = direction;
                 this.transition.time = new Date();
-                this.pos.x = coordonne.x;
-                this.pos.y = coordonne.y;
-                this.cible.x = this.pos.x * this.size;
-                this.cible.y = this.pos.y * this.size;
+                this.position.x = coordinates.x;
+                this.position.y = coordinates.y;
+                this.target.x = this.position.x * this.tileSize;
+                this.target.y = this.position.y * this.tileSize;
             } else {
                 this.collision = true;
             }
@@ -112,59 +100,59 @@ export class Entity {
         if (this.transition.state) {
             let time = new Date() - this.transition.time;
             if (time < this.transition.duration) {
-                if (this.transition.style === "marche") {
-                    this.sprite.pos.x = Math.easeInOutQuart(time, this.depart.x, this.cible.x - this.depart.x, this.transition.duration);
-                    this.sprite.pos.y = Math.easeInOutQuart(time, this.depart.y, this.cible.y - this.depart.y, this.transition.duration);
+                if (this.transition.style === "walk") {
+                    this.spriteSheet.position.x = Math.easeInOutQuart(time, this.currentLocation.x, this.target.x - this.currentLocation.x, this.transition.duration);
+                    this.spriteSheet.position.y = Math.easeInOutQuart(time, this.currentLocation.y, this.target.y - this.currentLocation.y, this.transition.duration);
                 } else {
-                    this.sprite.pos.x = Math.linearTween(time, this.depart.x, this.cible.x - this.depart.x, this.transition.duration);
-                    this.sprite.pos.y = Math.linearTween(time, this.depart.y, this.cible.y - this.depart.y, this.transition.duration);
+                    this.spriteSheet.position.x = Math.linearTween(time, this.currentLocation.x, this.target.x - this.currentLocation.x, this.transition.duration);
+                    this.spriteSheet.position.y = Math.linearTween(time, this.currentLocation.y, this.target.y - this.currentLocation.y, this.transition.duration);
                 }
             } else {
                 this.transition.state = false;
-                this.sprite.pos.x = this.cible.x;
-                this.sprite.pos.y = this.cible.y;
-                this.depart.x = this.cible.x;
-                this.depart.y = this.cible.y;
+                this.spriteSheet.position.x = this.target.x;
+                this.spriteSheet.position.y = this.target.y;
+                this.currentLocation.x = this.target.x;
+                this.currentLocation.y = this.target.y;
                 // en fonction du type de sol
-                switch (this.tuileCible.action) {
-                    case "glace":
-                        this.diriger(this.derniereDirection);
-                        this.peutBouger = this.collision;
+                switch (this.targetTile.action) {
+                    case "ice":
+                        this.diriger(this.lastDirection);
+                        this.canMove = this.collision;
                         break;
-                    case "gauche":
+                    case "left":
                         this.world.sounds.validation.url.play();
-                        this.peutBouger = false;
-                        this.diriger("gauche");
+                        this.canMove = false;
+                        this.diriger("left");
                         break;
                     case "haut":
                         this.world.sounds.validation.url.play();
-                        this.peutBouger = false;
-                        this.diriger("haut");
+                        this.canMove = false;
+                        this.diriger("up");
                         break;
                     case "bas":
                         this.world.sounds.validation.url.play();
-                        this.peutBouger = false;
-                        this.diriger("bas");
+                        this.canMove = false;
+                        this.diriger("down");
                         break;
-                    case "droite":
+                    case "right":
                         this.world.sounds.validation.url.play();
-                        this.peutBouger = false;
-                        this.diriger("droite");
+                        this.canMove = false;
+                        this.diriger("right");
                         break;
-                    case "piege":
-                        this.world.sounds.eboulement.url.play();
-                        this.world.effets.push(new Effect(this.world, this.pos.x * this.size, this.pos.y * this.size, this.world.resources.poussiere));
-                        this.world.terrain.geometrie[this.pos.y][this.pos.x] = 7;
-                        this.peutBouger = true;
+                    case "trap":
+                        this.world.sounds.landslide.url.play();
+                        this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.resources['dust']));
+                        this.world.terrain.geometry[this.position.y][this.position.x] = 7;
+                        this.canMove = true;
                         break;
                     case "suivant":
                         this.validation = true;
-                        this.peutBouger = true;
+                        this.canMove = true;
                         this.world.action("suivant");
                         break;
                     default:
-                        this.world.sounds.mouvement.url.play();
-                        this.peutBouger = true;
+                        this.world.sounds.movement.url.play();
+                        this.canMove = true;
                         this.validation = false;
                     // sol normal
                 }
@@ -173,8 +161,8 @@ export class Entity {
     }
 
     render() {
-        this.sprite.render();
+        this.spriteSheet.render();
         this.translation();
-        this.controles();
+        this.control();
     }
 }

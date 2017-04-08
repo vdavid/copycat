@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "css-loader": "0.28.0",
     "lodash": "4.17.4",
-    "style-loader": "0.16.1",
     "webpack": "2.3.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "css-loader": "0.28.0",
+    "style-loader": "0.16.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"

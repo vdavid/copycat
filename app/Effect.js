@@ -1,18 +1,18 @@
 export class Effect {
-    constructor(world, x, y, sprite) {
+    constructor(world, x, y, spriteSheet) {
         this.world = world;
         this.context = world.context;
-        this.sprite = sprite;
-        this.size = world.size;
-        this.l = Math.round(this.sprite.img.width / this.sprite.sep);
-        this.h = this.sprite.img.height / this.sprite.ligne;
-        this.pos = {
+        this.spriteSheet = spriteSheet;
+        this.tileSize = world.tileSize;
+        this.width = Math.round(this.spriteSheet.img.width / this.spriteSheet.spriteCount);
+        this.height = this.spriteSheet.img.height / this.spriteSheet.rowCount;
+        this.position = {
             x: x,
             y: y
         };
-        this.length = this.sprite.sep;
+        this.length = this.spriteSheet.spriteCount;
         this.frame = 0;
-        this.size = world.size;
+        this.tileSize = world.tileSize;
         this.selectLigne = 0;
         this.animation = true;
         this.allure = 0.4;
@@ -22,9 +22,9 @@ export class Effect {
         if (this.animation) {
             this.frame += this.allure;
             if (this.frame >= this.length) {
-                this.world.effets.splice(this.world.effets.indexOf(this), 1);
+                this.world.effects.splice(this.world.effects.indexOf(this), 1);
             }
         }
-        this.context.drawImage(this.sprite.img, Math.floor(this.frame) * this.l, this.selectLigne, this.l, this.h, this.pos.x - this.l / 4, this.pos.y - this.l / 4, this.l, this.h);
+        this.context.drawImage(this.spriteSheet.img, Math.floor(this.frame) * this.width, this.selectLigne, this.width, this.height, this.position.x - this.width / 4, this.position.y - this.width / 4, this.width, this.height);
     }
 }

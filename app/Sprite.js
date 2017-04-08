@@ -1,24 +1,24 @@
 export class Sprite {
     constructor(world, parent, sprite) {
         this.context = world.context;
-        this.sprite = sprite;
-        this.size = world.size;
-        this.l = Math.round(this.sprite.img.width / this.sprite.sep);
-        this.h = this.sprite.img.height / this.sprite.ligne;
-        this.pos = {
-            x: parent.pos.x * this.size,
-            y: parent.pos.y * this.size
+        this.spriteSheet = sprite;
+        this.tileSize = world.tileSize;
+        this.width = Math.round(this.spriteSheet.img.width / this.spriteSheet.spriteCount);
+        this.height = this.spriteSheet.img.height / this.spriteSheet.rowCount;
+        this.position = {
+            x: parent.position.x * this.tileSize,
+            y: parent.position.y * this.tileSize
         };
-        this.length = this.sprite.sep;
+        this.length = this.spriteSheet.spriteCount;
         this.frame = 0;
-        this.size = world.size;
+        this.tileSize = world.tileSize;
         this.selectLigne = 0;
         this.animation = true;
         this.allure = 0.2;
     }
 
     dessiner() {
-        this.context.drawImage(this.sprite.img, Math.floor(this.frame) * this.l, this.selectLigne, this.l, this.h, this.pos.x, this.pos.y, this.l, this.h);
+        this.context.drawImage(this.spriteSheet.img, Math.floor(this.frame) * this.width, this.selectLigne, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
     }
 
     animer() {

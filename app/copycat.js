@@ -1,4 +1,7 @@
-import {World} from './World';
+import {World} from "./World";
+import {levels} from "./data/levels";
+//noinspection ES6UnusedImports
+import css from "./copycat.css";
 
 /* Utilities */
 window.addEventListener("keydown", function (e) {
@@ -19,403 +22,45 @@ Math.easeInOutQuart = function (t, b, c, d) {
     return -c / 2 * (t * t * t * t - 2) + b;
 };
 
-/*
- _____                      _
- / ____|                    (_)
- | |     ___   ___ _   _ _ __ _ ___ 
- | |    / _ \ / _ \ | | | '__| / __|
- | |___| (_) |  __/ |_| | |_ | \__ \
- \_____\___/ \___|\__,_|_(_)| |___/
- _/ |
- |__/
- */
-
-
 let settings = {
-    size: 16,
+    tileSize: 16,
     zoom: 2,
-    stockImages: [{
-        img: "https://image.ibb.co/mHNuWF/font.png",
-        name: "pixelFont"
-    }, {
-        img: "https://image.ibb.co/hzo1BF/curseur.png",
-        name: "cursor"
-    }, {
-        img: "https://image.ibb.co/j1Zmdv/titre.png",
-        name: "titre"
-    }, {
-        img: "https://image.ibb.co/hKwMBF/joueur.png",
-        name: "playerSprite",
-        sep: 12,
-        ligne: 1
-    }, {
-        img: "https://image.ibb.co/h2Ns1F/explosion.png",
-        name: "explosion",
-        sep: 9,
-        ligne: 1
-    }, {
-        img: "https://image.ibb.co/b7aegF/feuille.png",
-        name: "feuille"
-    }, {
-        img: "https://image.ibb.co/mwXuWF/sortie.png",
-        name: "sortie",
-        sep: 10
-    }, {
-        img: "https://image.ibb.co/k95ZFa/poussiere.png",
-        name: "poussiere",
-        sep: 9,
-        ligne: 1
-    }, {
-        img: "https://image.ibb.co/j7aZFa/pattern.png",
-        name: "pattern"
-    }, {
-        img: "https://image.ibb.co/gAGzyv/lock.png",
-        name: "lock"
-    },],
-    stockSon: [{
-        url: "http://www.noiseforfun.com/waves/interface-and-media/NFF-select-04.wav",
-        name: "mouvement"
-    }, {
-        url: "http://www.noiseforfun.com/waves/interface-and-media/NFF-select.wav",
-        name: "selection"
-    }, {
-        url: "http://www.noiseforfun.com/waves/musical-and-jingles/NFF-bravo.wav",
-        name: "bravo"
-    }, {
-        url: "http://www.noiseforfun.com/waves/interface-and-media/NFF-click-switch.wav",
-        name: "validation"
-    }, {
-        url: "http://www.noiseforfun.com/waves/interface-and-media/NFF-bubble-input.wav",
-        name: "appearance"
-    }, {
-        url: "http://www.noiseforfun.com/waves/action-and-game/NFF-moving-block.wav",
-        name: "eboulement"
-    },],
-    clefs: [{
-        type: "tuile",
-        name: "eau",
-        id: 0,
-        collision: true,
-        apparence: "auto",
-        ligne: 3
-    }, {
-        type: "tuile",
-        name: "herbe",
-        id: 1,
-        collision: false,
-        apparence: 1
-    }, {
-        type: "tuile",
-        name: "mur",
-        id: 2,
-        collision: true,
-        apparence: "auto",
-        ligne: 1
-    }, {
-        type: "tuile",
-        name: "glace",
-        action: "glace",
-        id: 3,
-        collision: false,
-        apparence: "auto",
-        ligne: 2
-    }, {
-        type: "sprite",
-        name: "suivant",
-        id: 4,
-        collision: false,
-        action: "suivant",
-        apparence: "sortie",
-        ligne: 2,
-        allure: 0.3
-    }, {
-        type: "tuile",
-        name: "player",
-        id: 5,
-        collision: false,
-        apparence: 5
-    }, {
-        type: "tuile",
-        name: "piege",
-        action: "piege",
-        id: 6,
-        collision: false,
-        apparence: 6
-    }, {
-        type: "tuile",
-        name: "trou",
-        id: 7,
-        collision: true,
-        apparence: 7
-    }, {
-        type: "tuile",
-        name: "barriere",
-        id: 8,
-        collision: true,
-        apparence: "auto",
-        ligne: 4
-    }, {
-        type: "tuile",
-        name: "flecheGauche",
-        action: "gauche",
-        id: 9,
-        collision: false,
-        apparence: 9
-    }, {
-        type: "tuile",
-        name: "flecheHaut",
-        action: "haut",
-        id: 10,
-        collision: false,
-        apparence: 10
-    }, {
-        type: "tuile",
-        name: "flecheDroite",
-        action: "droite",
-        id: 11,
-        collision: false,
-        apparence: 11
-    }, {
-        type: "tuile",
-        name: "flecheBas",
-        action: "bas",
-        id: 12,
-        collision: false,
-        apparence: 12
-    },],
+    spriteSheets: [
+        {url: "./resources/images/font.png", name: "pixelFont"},
+        {url: "./resources/images/cursor.png", name: "cursor"},
+        {url: "./resources/images/title.png", name: "title"},
+        {url: "./resources/images/player.png", name: "playerSprite", spriteCount: 12, rowCount: 1},
+        {url: "./resources/images/explosion.png", name: "explosion", spriteCount: 9, rowCount: 1},
+        {url: "./resources/images/tiles.png", name: "tiles"},
+        {url: "./resources/images/exit.png", name: "exit", spriteCount: 10},
+        {url: "./resources/images/dust.png", name: "dust", spriteCount: 9, rowCount: 1},
+        {url: "./resources/images/pattern.png", name: "pattern"},
+        {url: "./resources/images/lock.png", name: "lock"}
+    ],
+    sounds: [
+        {url: "./resources/sounds/NFF-select-04.wav", name: "movement"},
+        {url: "./resources/sounds/NFF-select.wav", name: "selection"},
+        {url: "./resources/sounds/NFF-bravo.wav", name: "bravo"},
+        {url: "./resources/sounds/NFF-click-switch.wav", name: "validation"},
+        {url: "./resources/sounds/NFF-bubble-input.wav", name: "appearance"},
+        {url: "./resources/sounds/NFF-moving-block.wav", name: "landslide"},
+    ],
+    keys: [
+        {type: "tile", name: "water", id: 0, collision: true, apparence: "auto", rowIndex: 3},
+        {type: "tile", name: "grass", id: 1, collision: false, apparence: 1},
+        {type: "tile", name: "wall", id: 2, collision: true, apparence: "auto", rowIndex: 1},
+        {type: "tile", name: "ice", action: "ice", id: 3, collision: false, apparence: "auto", rowIndex: 2},
+        {type: "sprite", name: "suivant", id: 4, collision: false, action: "suivant", apparence: "exit", rowIndex: 2, allure: 0.3},
+        {type: "tile", name: "player", id: 5, collision: false, apparence: 5},
+        {type: "tile", name: "trap", action: "trap", id: 6, collision: false, apparence: 6},
+        {type: "tile", name: "hole", id: 7, collision: true, apparence: 7},
+        {type: "tile", name: "fence", id: 8, collision: true, apparence: "auto", rowIndex: 4},
+        {type: "tile", name: "leftArrow", action: "left", id: 9, collision: false, apparence: 9},
+        {type: "tile", name: "upArrow", action: "haut", id: 10, collision: false, apparence: 10},
+        {type: "tile", name: "rightArrow", action: "right", id: 11, collision: false, apparence: 11},
+        {type: "tile", name: "downArrow", action: "bas", id: 12, collision: false, apparence: 12}
+    ],
 
 };
-let levels = [
-
-    {
-        "name": "start",
-        "indice": "try to move forward",
-        "geometrie": [
-            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1, 1, 1, 1, 1],
-            [0, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 8, 4, 8, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1, 1, 1, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 8, 5, 8, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }, {
-        "name": "adeuxcestmieux",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 8, 8, 8, 8, 8, 1, 1, 8, 8, 8, 8, 8, 1, 1],
-            [1, 1, 8, 1, 1, 1, 8, 1, 1, 8, 1, 1, 1, 8, 1, 1],
-            [1, 1, 8, 1, 4, 1, 8, 1, 1, 8, 1, 4, 1, 8, 1, 1],
-            [1, 1, 8, 1, 1, 1, 8, 1, 1, 8, 1, 1, 1, 8, 1, 1],
-            [1, 1, 8, 1, 1, 1, 8, 1, 1, 8, 1, 1, 1, 8, 1, 1],
-            [1, 1, 8, 2, 2, 1, 8, 1, 1, 8, 1, 2, 2, 8, 1, 1],
-            [1, 1, 8, 1, 1, 1, 8, 1, 1, 8, 1, 1, 1, 8, 1, 1],
-            [1, 1, 8, 1, 5, 1, 8, 1, 1, 8, 1, 5, 1, 8, 1, 1],
-            [1, 1, 8, 1, 1, 1, 8, 1, 1, 8, 1, 1, 1, 8, 1, 1],
-            [1, 1, 8, 8, 8, 8, 8, 1, 1, 8, 8, 8, 8, 8, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }, {
-        "name": "séparé",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 2, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 0, 0, 1, 4, 1, 1, 2, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 2, 1, 1],
-            [1, 1, 2, 4, 1, 1, 1, 0, 0, 1, 2, 1, 1, 2, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 2, 1, 1],
-            [1, 1, 2, 8, 8, 8, 1, 0, 0, 1, 1, 1, 1, 2, 1, 1],
-            [1, 1, 2, 5, 1, 1, 1, 0, 0, 1, 1, 5, 1, 2, 1, 1],
-            [1, 1, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    },
-
-    {
-        "name": "aquatrecestmieux",
-        "geometrie": [
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 0, 0, 1, 5, 1, 1, 1, 1, 2],
-            [2, 1, 2, 4, 1, 1, 1, 0, 0, 1, 1, 1, 4, 1, 2, 2],
-            [2, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 5, 1, 0, 0, 1, 2, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-            [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-            [2, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 4, 1, 1, 0, 0, 1, 1, 1, 4, 5, 1, 2],
-            [2, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 1, 2, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 2, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2],
-            [2, 1, 1, 5, 1, 1, 1, 0, 0, 1, 1, 1, 2, 1, 1, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-        ]
-    },
-
-    {
-        "name": "introTrou",
-        "indice": "you can restart with touch 'r'",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 1, 5, 8, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 8, 6, 8, 8, 8, 8, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 6, 1, 1, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 8, 8, 8, 1, 8, 1, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 6, 8, 1, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 8, 1, 8, 8, 8, 8, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 6, 1, 1, 1, 1, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 8, 8, 8, 8, 1, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 1, 8, 4, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }, {
-        "name": "introGlace",
-        "indice": "you can't change your direction on ice",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 1, 5, 1, 1, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 1, 2, 2, 2, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 3, 3, 3, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 3, 3, 3, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 3, 3, 1, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 2, 3, 3, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 3, 3, 3, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 3, 3, 3, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 3, 3, 4, 3, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }, {
-        "name": "glisseadeux",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 2, 1],
-            [1, 2, 1, 1, 4, 1, 1, 1, 1, 1, 8, 5, 1, 1, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
-            [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
-            [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 1, 2, 1],
-            [1, 2, 1, 1, 5, 1, 3, 3, 3, 3, 3, 4, 8, 1, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 1, 2, 1],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
-            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }, {
-        "name": "ice cavern",
-        "geometrie": [
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 4, 2, 2],
-            [2, 2, 2, 3, 3, 2, 3, 3, 2, 3, 2, 2, 3, 2, 2, 2],
-            [2, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 2, 3, 3, 3, 3, 1, 1, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 1, 5, 2, 2, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2],
-            [2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-        ]
-    }, {
-        "name": "introswitch",
-        "indice": "switches are cool",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 12, 3, 3, 3, 9, 5, 8, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 3, 1, 1, 1, 8, 8, 8, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 8, 4, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 8, 4, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 3, 1, 1, 1, 8, 8, 8, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 10, 3, 3, 3, 9, 5, 8, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }, {
-        "name": "glissefeche",
-        "geometrie": [
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 3, 3, 11, 1, 3, 3, 3, 3, 12, 2, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 4, 3, 3, 3, 2, 3, 3, 2, 2, 2],
-            [2, 2, 2, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 5, 3, 2, 2, 2],
-            [2, 2, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 2, 2],
-            [2, 2, 2, 3, 3, 11, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 1, 3, 2, 2, 2, 2],
-            [2, 2, 2, 3, 3, 1, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 10, 2, 2, 2],
-            [2, 2, 2, 3, 3, 3, 5, 3, 3, 3, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-        ]
-    }, {
-        "name": "unpeudaide",
-        "geometrie": [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 8, 8, 8, 1, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1],
-            [1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1],
-            [1, 1, 8, 4, 8, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1],
-            [1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1],
-            [1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 8, 6, 8, 1, 1],
-            [1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 8, 4, 8, 1, 1],
-            [1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 8, 3, 8, 1, 1],
-            [1, 1, 8, 5, 8, 1, 1, 1, 1, 1, 1, 8, 3, 8, 1, 1],
-            [1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 8, 5, 8, 1, 1],
-            [1, 1, 8, 8, 8, 1, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        ]
-    }
-];
 
 new World(settings, levels);
