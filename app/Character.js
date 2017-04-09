@@ -30,7 +30,7 @@ export class Character {
         this.collision = false;
         this.validation = false;
         this.world.soundBox.playAppearanceAudio();
-        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.resources['explosion']));
+        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.spriteService.getSpriteSheet('explosion')));
     }
 
     control() {
@@ -140,7 +140,7 @@ export class Character {
                         break;
                     case "trap":
                         this.world.soundBox.playLandslideAudio();
-                        this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.resources['dust']));
+                        this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.spriteService.getSpriteSheet('dust')));
                         this.world.board.cells[this.position.y][this.position.x] = 7;
                         this.canMove = true;
                         break;

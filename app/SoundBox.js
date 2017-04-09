@@ -13,35 +13,29 @@ export class SoundBox {
      * @param {function?} progressCallback No parameters.
      */
     constructor(masterVolume, progressCallback) {
-        this.loadedAudioCount = 0;
-
         this.audios = {};
-        for (let index in audioResources) {
-            if (audioResources.hasOwnProperty(index)) {
-                this._loadAudio(audioResources[index].url, masterVolume)
-                    .then(audio => {
-                            this.audios[audioResources[index].name] = audio;
-                            this.loadedAudioCount++;
-                            progressCallback();
-                        })
-                    .catch(error => {
-                            console.log('Media not loaded. Error code: ' + error.code + '. Url: ' + error.url);
-                        });
-            }
+        for (let i = 0; i < audioResources.length; i++) {
+            this._loadAudio(audioResources[i].url, masterVolume)
+                .then(audio => {
+                    console.log('Audio loaded: ' + audioResources[i].name);
+                    this.audios[audioResources[i].name] = audio;
+                    progressCallback();
+                })
+                .catch(error => {
+                    console.log(error);
+                    console.log('Audio not loaded. Error code: ' + error.code + '. Url: ' + error.url);
+                });
         }
     }
 
     _loadAudio(url, masterVolume) {
         return new Promise((resolve, reject) => {
             //noinspection JSUnresolvedFunction
-            let audio = new Audio(url);
-            if (!audio.error) {
-                audio.volume = masterVolume;
-                audio.addEventListener('canplaythrough', () => resolve(audio));
-            } else {
-                audio.error.url = url;
-                reject(audio.error);
-            }
+            let audio = new Audio();
+            audio.addEventListener('canplaythrough', () => { resolve(audio); });
+            audio.addEventListener('error', (error) => { error.url = url; reject(error); });
+            audio.src = url;
+            audio.volume = masterVolume;
         });
     }
 

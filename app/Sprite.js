@@ -3,13 +3,13 @@ export class Sprite {
         this.context = world.context;
         this.spriteSheet = sprite;
         this.tileSize = world.tileSize;
-        this.width = Math.round(this.spriteSheet.img.width / this.spriteSheet.spriteCount);
-        this.height = this.spriteSheet.img.height / this.spriteSheet.rowCount;
+        this.width = Math.round(this.spriteSheet.image.width / this.spriteSheet.columnCount);
+        this.height = this.spriteSheet.image.height / this.spriteSheet.rowCount;
         this.position = {
             x: parent.position.x * this.tileSize,
             y: parent.position.y * this.tileSize
         };
-        this.length = this.spriteSheet.spriteCount;
+        this.length = this.spriteSheet.columnCount;
         this.frame = 0;
         this.tileSize = world.tileSize;
         this.selectLigne = 0;
@@ -17,11 +17,11 @@ export class Sprite {
         this.allure = 0.2;
     }
 
-    dessiner() {
-        this.context.drawImage(this.spriteSheet.img, Math.floor(this.frame) * this.width, this.selectLigne, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+    draw() {
+        this.context.drawImage(this.spriteSheet.image, Math.floor(this.frame) * this.width, this.selectLigne, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
     }
 
-    animer() {
+    animate() {
         if (this.animation) {
             this.frame += this.allure;
             if (this.frame >= this.length) {
@@ -31,7 +31,7 @@ export class Sprite {
     }
 
     render() {
-        this.animer();
-        this.dessiner();
+        this.animate();
+        this.draw();
     }
 }

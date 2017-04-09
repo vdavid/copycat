@@ -2,6 +2,7 @@ import {Menu} from "./Menu";
 import {Character} from "./Character";
 import {ArrayChunker} from "./ArrayChunker";
 import {SoundBox} from "./SoundBox";
+import {SpriteService} from "./SpriteService";
 
 export class World {
     constructor(settings, levels) {
@@ -12,16 +13,15 @@ export class World {
         this.zoom = settings.zoom || 2;
         this.remplissage = false;
         this.state = "menu";
+        this.keys = settings.keys;
         // Frames per second
         this.fps = 60;
+        this.createContext();
         // resources
         this.loadedResourceCount = 0;
         this.soundBox = new SoundBox(0.05, () => { this.updateProgress(); });
-        this.totalResourceCount = settings.spriteSheets.length + SoundBox.getSupportedSoundCount();
-        this.resources = {};
-        // Initialization + loading
-        this.createContext();
-        this.loadResources(settings.spriteSheets, settings.keys);
+        this.spriteService = new SpriteService(() => { this.updateProgress(); });
+        this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + SoundBox.getSupportedSoundCount(); // TODO: Resources might start loading earlier than this gets set – progress bar will be shit! Loading should come after instantiation!
         // levels
         this.levels = levels;
         this.currentLevel = 0;
@@ -47,12 +47,12 @@ export class World {
                 for (let i = 0; i < this.count; i++) {
                     if (i > this.world.lastLevel - 1) {
                         this.context.globalAlpha = 0.6;
-                        this.world.context.drawImage(this.world.resources['lock'].img, (32 + Math.floor(i % 7) * 32) - this.world.resources['lock'].img.width / 2, (64 + Math.floor(i / 7) * 32) + 10);
+                        this.world.context.drawImage(this.world.spriteService.getSpriteSheet('lock').image, (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getSpriteSheet('lock').image.width / 2, (64 + Math.floor(i / 7) * 32) + 10);
                     }
                     this.world.write((i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
                 }
-                this.world.context.drawImage(this.world.resources.cursor.img, 0, 16, 32, 32, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32, 32, 32);
+                this.world.context.drawImage(this.world.spriteService.getSpriteSheet('cursor').image, 0, 16, 32, 32, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32, 32, 32);
             },
             change: function (keyCode) {
                 if (keyCode === 38 && this.selection - 6 > 0) {
@@ -91,8 +91,10 @@ export class World {
     createContext() {
         this.canvas = document.createElement("canvas");
         this.context = this.canvas.getContext('2d');
-        this.width = this.canvas.width = 16 * 16;
-        this.height = this.canvas.height = 16 * 16;
+        this.width = 16 * 16;
+        this.canvas.width = 16 * 16;
+        this.height = 16 * 16;
+        this.canvas.height = 16 * 16;
         this.canvas.style.width = this.width * this.zoom + "px";
         this.canvas.style.height = this.height * this.zoom + "px";
         this.context.msImageSmoothingEnabled = false;
@@ -106,6 +108,10 @@ export class World {
         console.log('loaded');
         if (this.loadedResourceCount === this.totalResourceCount) {
             console.log('%c resources are loaded ' + this.loadedResourceCount + " of " + this.totalResourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
+
+            // Initialization + loading
+            this.loadResources(this.keys);
+
             // menu
             let buttons = [{
                 name: "start game",
@@ -134,25 +140,7 @@ export class World {
         }
     }
 
-    loadImage(url) {
-        let img = new Image();
-        let self = this;
-        img.onload = function () {
-            self.updateProgress();
-        };
-        img.src = url;
-        return img;
-    }
-
-    loadResources(spriteSheets, keys) {
-        // traitement images
-        let images = {};
-        for (let i = 0; i < spriteSheets.length; i++) {
-            spriteSheets[i].img = this.loadImage(spriteSheets[i].url);
-            images[spriteSheets[i].name] = spriteSheets[i];
-        }
-        this.resources = images;
-
+    loadResources(keys) {
         //  Key processing
         this.nettoyer = new Array(keys.length).fill(false);
         let CM = {};
@@ -160,7 +148,7 @@ export class World {
             let name = keys[i].id;
             if (keys[i].type === "sprite") {
                 keys[i].frame = 0;
-                keys[i].spriteSheet = this.resources[keys[i].apparence];
+                keys[i].spriteSheet = this.spriteService.getSpriteSheet(keys[i].apparence);
                 keys[i].memoireBoucle = false;
                 keys[i].canAnimate = true;
                 keys[i].isAnimated = true;
@@ -291,7 +279,7 @@ export class World {
             let index = this.alphabet.indexOf(text.charAt(i)),
                 clipX = width * index,
                 posX = (x - centre) + (i * width);
-            this.context.drawImage(this.resources['pixelFont'].img, clipX, 0, width, height, posX, y, width, height);
+            this.context.drawImage(this.spriteService.getSpriteSheet('pixelFont').image, clipX, 0, width, height, posX, y, width, height);
         }
     }
 
@@ -303,21 +291,22 @@ export class World {
         // Draws edges
 
         /* Top left */
-        this.context.drawImage(this.resources.cursor.img, 32, 16, 16, 16, x, y, 16, 16);
+        let cursorSpriteSheet = this.spriteService.getSpriteSheet('cursor').image;
+        this.context.drawImage(cursorSpriteSheet, 32, 16, 16, 16, x, y, 16, 16);
         /* Top right */
-        this.context.drawImage(this.resources.cursor.img, 32 + 8, 16, 16, 16, x + width - 16, y, 16, 16);
+        this.context.drawImage(cursorSpriteSheet, 32 + 8, 16, 16, 16, x + width - 16, y, 16, 16);
         /* Bottom left */
-        this.context.drawImage(this.resources.cursor.img, 32, 16 + 8, 16, 16, x, y + height - 16, 16, 16);
+        this.context.drawImage(cursorSpriteSheet, 32, 16 + 8, 16, 16, x, y + height - 16, 16, 16);
         /* Bottom right */
-        this.context.drawImage(this.resources.cursor.img, 32 + 8, 16 + 8, 16, 16, x + width - 16, y + height - 16, 16, 16);
+        this.context.drawImage(cursorSpriteSheet, 32 + 8, 16 + 8, 16, 16, x + width - 16, y + height - 16, 16, 16);
         /* Top */
-        this.context.drawImage(this.resources.cursor.img, 32 + 4, 16, 16, 16, x + 16, y, width - 32, 16);
+        this.context.drawImage(cursorSpriteSheet, 32 + 4, 16, 16, 16, x + 16, y, width - 32, 16);
         /* Bottom */
-        this.context.drawImage(this.resources.cursor.img, 32 + 4, 16 + 8, 16, 16, x + 16, y + height - 16, width - 32, 16);
+        this.context.drawImage(cursorSpriteSheet, 32 + 4, 16 + 8, 16, 16, x + 16, y + height - 16, width - 32, 16);
         /* Left */
-        this.context.drawImage(this.resources.cursor.img, 32, 16 + 4, 16, 16, x, y + 16, 16, height - 32);
+        this.context.drawImage(cursorSpriteSheet, 32, 16 + 4, 16, 16, x, y + 16, 16, height - 32);
         /* Right */
-        this.context.drawImage(this.resources.cursor.img, 32 + 8, 16 + 4, 16, 16, x + width - 16, y + 16, 16, height - 32);
+        this.context.drawImage(cursorSpriteSheet, 32 + 8, 16 + 4, 16, 16, x + width - 16, y + 16, 16, height - 32);
     }
 
     bitMasking() {
@@ -372,7 +361,7 @@ export class World {
                 if (this.keys[id].apparence === "auto") {
                     sourceX = Math.floor(this.board.apparence[j][i]) * this.tileSize;
                     sourceY = Math.floor(this.board.apparence[j][i]) * this.tileSize;
-                    this.context.drawImage(this.resources['tiles'].img,
+                    this.context.drawImage(this.spriteService.getSpriteSheet('tiles').image,
                         sourceX, this.keys[id].rowIndex * this.tileSize, this.tileSize, this.tileSize,
                         i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 } else if (this.keys[id].type === "sprite") {
@@ -380,7 +369,7 @@ export class World {
                         if (this.keys[id].canAnimate) {
                             this.keys[id].frame += this.keys[id].allure;
                         }
-                        if (this.keys[id].frame >= this.keys[id].spriteSheet.spriteCount) {
+                        if (this.keys[id].frame >= this.keys[id].spriteSheet.columnCount) {
                             if (!this.keys[id].isAnimated) {
                                 this.keys[id].canAnimate = false;
                             }
@@ -390,11 +379,11 @@ export class World {
                         // on sait quel id est déjà passé :^)
                         this.nettoyer[id] = true;
                     }
-                    this.context.drawImage(this.keys[id].spriteSheet.img, Math.floor(this.keys[id].frame) * this.tileSize, 0, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+                    this.context.drawImage(this.keys[id].spriteSheet.image, Math.floor(this.keys[id].frame) * this.tileSize, 0, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 } else {
                     sourceX = Math.floor(this.keys[id].apparence % 16) * this.tileSize;
                     sourceY = Math.floor(this.keys[id].apparence / 16) * this.tileSize;
-                    this.context.drawImage(this.resources['tiles'].img, sourceX, sourceY, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+                    this.context.drawImage(this.spriteService.getSpriteSheet('tiles').image, sourceX, sourceY, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 }
             }
         }
@@ -437,7 +426,7 @@ export class World {
         this.cat = [];
         let posCat = this.findKey("player");
         for (let i = 0; i < posCat.length; i++) {
-            this.cat.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.resources['playerSprite']));
+            this.cat.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet('playerSprite')));
         }
     }
 
@@ -533,11 +522,11 @@ export class World {
         this.context.fillRect(0, 0, this.width, this.height);
         switch (phase) {
             case "menu": // Displays game menu
-                let pattern = this.context.createPattern(this.resources['pattern'].img, "repeat");
+                let pattern = this.context.createPattern(this.spriteService.getSpriteSheet('pattern').image, "repeat");
                 this.context.fillStyle = pattern;
                 this.context.fillRect(0, 0, this.width, this.height);
 
-                this.context.drawImage(this.resources['title'].img, 0, 0);
+                this.context.drawImage(this.spriteService.getSpriteSheet('title').image, 0, 0);
                 this.menu.render();
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);

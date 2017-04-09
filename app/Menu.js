@@ -9,7 +9,7 @@ export class Menu {
         };
         this.selection = 0;
         this.max = this.choice.length - 1;
-        this.cursor = this.parent.resources.cursor;
+        this.cursor = this.parent.spriteService.getSpriteSheet('cursor');
         this.buttons = [];
         let values = [];
         for (let i = 0; i < this.choice.length; i++) {
@@ -48,6 +48,6 @@ export class Menu {
             this.parent.write(this.choice[i].name, this.position.x, this.position.y + 25 * i);
         }
         // on affiche la selection
-        this.context.drawImage(this.cursor.img, 48, 0, 16, 16, this.position.x - this.texteMax / 2 + 8, this.position.y + 25 * (this.selection) - 4, 16, 16);
+        this.context.drawImage(this.cursor.image, 48, 0, 16, 16, this.position.x - this.texteMax / 2 + 8, this.position.y + 25 * (this.selection) - 4, 16, 16);
     }
 }
