@@ -439,8 +439,8 @@ export class World {
         this.context.fillRect(0, 0, this.width, this.height);
         this.renderTerrain();
 
-        this.cats.every(cat => { cat.render(); });
-        this.effects.every(effect => { effect.render(); });
+        this.cats.forEach(cat => { cat.render(); });
+        this.effects.forEach(effect => { effect.render(); });
 
         /* Displays next frame */
         if (!this.isStopped) {
