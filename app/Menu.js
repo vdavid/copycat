@@ -1,38 +1,31 @@
+import {KeyCodes} from "./KeyCodes";
+
 export class Menu {
-    constructor(parent, x, y, choice) {
+    constructor(parent, centerX, centerY, menuItems) {
         this.parent = parent;
         this.context = parent.context;
-        this.choice = choice;
-        this.position = {
-            x: x,
-            y: y
-        };
+        this.menuItems = menuItems;
+        this.centerX = centerX;
+        this.centerY = centerY;
         this.selection = 0;
-        this.max = this.choice.length - 1;
+        this.max = this.menuItems.length - 1;
         this.cursor = this.parent.spriteService.getSpriteSheet('cursor');
-        this.buttons = [];
-        let values = [];
-        for (let i = 0; i < this.choice.length; i++) {
-            values.push(this.choice[i].name.length);
-        }
-        this.texteMax = Math.max(...values) * 6 + 60;
+        this.longestMenuItemName = Math.max(...(menuItems.map(menuItem => menuItem.name.length)));
     }
 
     change(keyCode) {
-        if (keyCode === 38 && this.selection > 0) {
-            // up
+        if (keyCode === KeyCodes.UP && this.selection > 0) {
             this.parent.soundBox.playSelectionAudio();
             this.selection -= 1;
             this.render();
-        } else if (keyCode === 40 && this.selection < this.max) {
-            // down
+        } else if (keyCode === KeyCodes.DOWN && this.selection < this.max) {
             this.parent.soundBox.playSelectionAudio();
             this.selection += 1;
             this.render();
-        } else if (keyCode === 88) {
+        } else if (keyCode === KeyCodes.X) {
             // select
             this.parent.soundBox.playValidationAudio();
-            this.parent.phase(this.choice[this.selection].lien);
+            this.parent.phase(this.menuItems[this.selection].link);
         }
     }
 
@@ -40,14 +33,15 @@ export class Menu {
     // }
 
     render() {
+        let width = this.longestMenuItemName * 6 + 60;
         this.context.fillStyle = "#fff1e8";
         // Draws the frame
-        this.parent.drawFrame(this.position.x - this.texteMax / 2, this.position.y - 10, this.texteMax, 26 * this.choice.length);
+        this.parent.drawFrame(this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length);
         // Displays the title
-        for (let i = 0; i < this.choice.length; i++) {
-            this.parent.write(this.choice[i].name, this.position.x, this.position.y + 25 * i);
+        for (let i = 0; i < this.menuItems.length; i++) {
+            this.parent.write(this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
         // on affiche la selection
-        this.context.drawImage(this.cursor.image, 48, 0, 16, 16, this.position.x - this.texteMax / 2 + 8, this.position.y + 25 * (this.selection) - 4, 16, 16);
+        this.context.drawImage(this.cursor.image, 48, 0, 16, 16, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 16, 16);
     }
 }

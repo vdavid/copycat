@@ -113,20 +113,20 @@ export class World {
             this.loadResources(this.keys);
 
             // menu
-            let buttons = [{
+            let menuItems = [{
                 name: "start game",
-                lien: "start"
+                link: "start"
             }, {
                 name: "levels",
-                lien: "levels"
+                link: "levels"
             }, {
                 name: "how to play",
-                lien: "rules"
+                link: "rules"
             }, {
                 name: "about",
-                lien: "info"
+                link: "info"
             },];
-            this.menu = new Menu(this, this.width / 2, 110, buttons);
+            this.menu = new Menu(this, this.width / 2, 110, menuItems);
             // End of initialization
             this.phase("menu");
             document.addEventListener("keydown", event => this.touchePresse(event), false);
