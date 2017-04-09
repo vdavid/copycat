@@ -7,7 +7,6 @@ import {SpriteService} from "./SpriteService";
 export class World {
     constructor(settings, levels) {
         // settings
-        this.alphabet = "abcdefghijklmnopqrstuvwxyz0123456789 ?!():'";
         this.tileSize = settings.tileSize;
         this.buttons = [];
         this.zoom = settings.zoom || 2;
@@ -59,7 +58,7 @@ export class World {
             render: function () {
                 this.context.fillStyle = "#fff1e8";
                 this.world.drawFrame(10, 10, this.world.width - 20, 200 - 20);
-                this.world.write("select level", this.world.width / 2, 25);
+                this.world.spriteService.write(this.world.context, "select level", this.world.width / 2, 25);
                 for (let i = 0; i < this.count; i++) {
                     if (i > this.world.lastLevel - 1) {
                         this.context.globalAlpha = 0.6;
@@ -68,7 +67,7 @@ export class World {
                             (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getLockImage().width / 2,
                             (64 + Math.floor(i / 7) * 32) + 10);
                     }
-                    this.world.write((i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
+                    this.world.spriteService.write(this.world.context, (i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
                 }
                 this.world.context.drawImage(this.world.spriteService.getSpriteSheet('cursor').image, 0, 16, 32, 32, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32, 32, 32);
@@ -274,18 +273,6 @@ export class World {
         }
     }
 
-    write(text, x, y) {
-        let width = 6;
-        let height = 9;
-        let centre = (text.length * width) / 2;
-        for (let i = 0; i < text.length; i++) {
-            let index = this.alphabet.indexOf(text.charAt(i)),
-                clipX = width * index,
-                posX = (x - centre) + (i * width);
-            this.context.drawImage(this.spriteService.getSpriteSheet('pixelFont').image, clipX, 0, width, height, posX, y, width, height);
-        }
-    }
-
     drawFrame(x, y, width, height) {
         this.context.fillStyle = "#fff1e8";
         // Draws background
@@ -397,7 +384,7 @@ export class World {
         }
         if (this.levels[this.currentLevel].comment) {
             this.drawFrame(0, this.height - 32, this.width, 32);
-            this.write(this.levels[this.currentLevel].comment, this.width / 2, this.height - 20);
+            this.spriteService.write(this.context, this.levels[this.currentLevel].comment, this.width / 2, this.height - 20);
         }
 
     }
@@ -527,47 +514,47 @@ export class World {
                 this.menu.render();
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);
-                this.write("arrow keys to select 'x' to confirm", this.width / 2, this.height - 30);
+                this.spriteService.write(this.context, "arrow keys to select 'x' to confirm", this.width / 2, this.height - 30);
                 break;
             case "start":
                 this.intro();
                 break;
             case "fin": // Displays the player's death chart
-                this.write("thanks for playing :) !", this.width / 2, 15);
-                this.write("if you have something to tell me about", this.width / 2, 40);
-                this.write("this pen please do so", this.width / 2, 55);
-                this.write("in the comment section.", this.width / 2, 70);
-                this.write("any feedback is appreciated", this.width / 2, 85);
+                this.spriteService.write(this.context, "thanks for playing :) !", this.width / 2, 15);
+                this.spriteService.write(this.context, "if you have something to tell me about", this.width / 2, 40);
+                this.spriteService.write(this.context, "this pen please do so", this.width / 2, 55);
+                this.spriteService.write(this.context, "in the comment section.", this.width / 2, 70);
+                this.spriteService.write(this.context, "any feedback is appreciated", this.width / 2, 85);
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);
-                this.write("press 'c' to return to menu", this.width / 2, this.height - 30);
+                this.spriteService.write(this.context, "press 'c' to return to menu", this.width / 2, this.height - 30);
                 break;
             case "rules": // Displays rules
-                this.write("game control: ", this.width / 2, 15);
-                this.write("arrow keys to move", this.width / 2, 60);
-                this.write("'f' to toggle fullscreen", this.width / 2, 80);
-                this.write("'r' if you're stuck", this.width / 2, 100);
-                this.write("'e' to exit the game", this.width / 2, 120);
+                this.spriteService.write(this.context, "game control: ", this.width / 2, 15);
+                this.spriteService.write(this.context, "arrow keys to move", this.width / 2, 60);
+                this.spriteService.write(this.context, "'f' to toggle fullscreen", this.width / 2, 80);
+                this.spriteService.write(this.context, "'r' if you're stuck", this.width / 2, 100);
+                this.spriteService.write(this.context, "'e' to exit the game", this.width / 2, 120);
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);
-                this.write("press 'c' to return to menu", this.width / 2, this.height - 30);
+                this.spriteService.write(this.context, "press 'c' to return to menu", this.width / 2, this.height - 30);
                 break;
             case "info": // Displays infos
-                this.write("about: ", this.width / 2, 15);
-                this.write("made with html5 canvas", this.width / 2, 40);
-                this.write("by gtibo on codepen", this.width / 2, 55);
-                this.write("credits:", this.width / 2, 80);
-                this.write("sound effects: noiseforfun.com", this.width / 2, 100);
+                this.spriteService.write(this.context, "about: ", this.width / 2, 15);
+                this.spriteService.write(this.context, "made with html5 canvas", this.width / 2, 40);
+                this.spriteService.write(this.context, "by gtibo on codepen", this.width / 2, 55);
+                this.spriteService.write(this.context, "credits:", this.width / 2, 80);
+                this.spriteService.write(this.context, "sound effects: noiseforfun.com", this.width / 2, 100);
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);
-                this.write("press 'c' to return to menu", this.width / 2, this.height - 30);
+                this.spriteService.write(this.context, "press 'c' to return to menu", this.width / 2, this.height - 30);
                 break;
             case "levels": // Displays menu levels
                 this.menuLevels.render();
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 28);
-                this.write("arrow keys to select 'x' to confirm", this.width / 2, this.height - 30);
-                this.write("press 'c' to return to menu", this.width / 2, this.height - 20);
+                this.spriteService.write(this.context, "arrow keys to select 'x' to confirm", this.width / 2, this.height - 30);
+                this.spriteService.write(this.context, "press 'c' to return to menu", this.width / 2, this.height - 20);
                 break;
             default:
                 console.log("aucune action reconnue");

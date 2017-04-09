@@ -39,9 +39,11 @@ export class Menu {
         this.parent.drawFrame(this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length);
         // Displays the title
         for (let i = 0; i < this.menuItems.length; i++) {
-            this.parent.write(this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
+            this.parent.spriteService.write(this.parent.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
         // on affiche la selection
-        this.context.drawImage(this.cursor.image, 48, 0, 16, 16, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 16, 16);
+        this.parent.spriteService.draw('cursor', this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
+//        console.log(this.context, this.cursor.image, 48, 0, 16, 16, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 16, 16);
+        //this.context.drawImage(this.cursor.image, 48, 0, 16, 16, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 16, 16);
     }
 }
