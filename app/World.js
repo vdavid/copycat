@@ -16,7 +16,20 @@ export class World {
         this.keys = settings.keys;
         // Frames per second
         this.fps = 60;
-        this.createContext();
+
+        this.canvas = document.createElement("canvas");
+        this.context = this.canvas.getContext('2d');
+        this.width = this.tileSize * 16;
+        this.canvas.width = this.tileSize * 16;
+        this.height = this.tileSize * 16;
+        this.canvas.height = this.tileSize * 16;
+        this.canvas.style.width = this.width * this.zoom + "px";
+        this.canvas.style.height = this.height * this.zoom + "px";
+        this.context.msImageSmoothingEnabled = false;
+        this.context.imageSmoothingEnabled = false;
+        document.body.appendChild(this.canvas);
+        console.log('%c World created ', 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
+
         // resources
         this.loadedResourceCount = 0;
         this.audioService = new AudioService(0.05, () => { this.updateProgress(); });
@@ -32,7 +45,7 @@ export class World {
         }
         // Recovers last save
         this.lastLevel = JSON.parse(localStorage['copycat']);
-        this.cat = [];
+        this.cats = [];
         // Menu levels
         let self = this;
         this.menuLevels = {
@@ -47,7 +60,10 @@ export class World {
                 for (let i = 0; i < this.count; i++) {
                     if (i > this.world.lastLevel - 1) {
                         this.context.globalAlpha = 0.6;
-                        this.world.context.drawImage(this.world.spriteService.getLockImage(), (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getSpriteSheet.getLockImage().width / 2, (64 + Math.floor(i / 7) * 32) + 10);
+
+                        this.world.spriteService.draw(SpriteService.LOCK_SPRITE, this.world.context,
+                            (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getLockImage().width / 2,
+                            (64 + Math.floor(i / 7) * 32) + 10);
                     }
                     this.world.write((i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
@@ -88,24 +104,8 @@ export class World {
         this.effects = [];
     }
 
-    createContext() {
-        this.canvas = document.createElement("canvas");
-        this.context = this.canvas.getContext('2d');
-        this.width = 16 * 16;
-        this.canvas.width = 16 * 16;
-        this.height = 16 * 16;
-        this.canvas.height = 16 * 16;
-        this.canvas.style.width = this.width * this.zoom + "px";
-        this.canvas.style.height = this.height * this.zoom + "px";
-        this.context.msImageSmoothingEnabled = false;
-        this.context.imageSmoothingEnabled = false;
-        document.body.appendChild(this.canvas);
-        console.log('%c World created ', 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
-    }
-
     updateProgress() {
         this.loadedResourceCount += 1;
-        console.log('loaded');
         if (this.loadedResourceCount === this.totalResourceCount) {
             console.log('%c resources are loaded ' + this.loadedResourceCount + " of " + this.totalResourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
 
@@ -423,29 +423,23 @@ export class World {
 
     initPlayer() {
         this.effects = [];
-        this.cat = [];
+        this.cats = [];
         let posCat = this.findKey("player");
         for (let i = 0; i < posCat.length; i++) {
-            this.cat.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet('playerSprite')));
+            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet('playerSprite')));
         }
-    }
-
-    render() {
-        let i;
-        this.renderTerrain();
-        for (i = 0; i < this.cat.length; i++) {
-            this.cat[i].render();
-        }
-        for (i = this.effects.length - 1; i >= 0; i--) {
-            this.effects[i].render();
-        }
-        // afficher comment
     }
 
     animate() {
+        /* Clears screen */
         this.context.fillStyle = "black";
         this.context.fillRect(0, 0, this.width, this.height);
-        this.render();
+        this.renderTerrain();
+
+        this.cats.every(cat => { cat.render(); });
+        this.effects.every(effect => { effect.render(); });
+
+        /* Displays next frame */
         if (!this.isStopped) {
             this.animation = requestAnimationFrame(() => this.animate());
         }
@@ -581,8 +575,8 @@ export class World {
         switch (action) {
             case "nextLevel":
                 let tab = [];
-                for (let i = 0; i < this.cat.length; i++) {
-                    tab.push(this.cat[i].validation);
+                for (let i = 0; i < this.cats.length; i++) {
+                    tab.push(this.cats[i].validation);
                 }
                 let confirmation = tab.every(function (vrai) {
                     return vrai === true;

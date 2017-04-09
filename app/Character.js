@@ -1,5 +1,6 @@
 import {Effect} from "./Effect";
 import {Sprite} from "./Sprite";
+import {SpriteService} from "./SpriteService";
 
 export class Character {
     constructor(world, x, y, sprite) {
@@ -140,7 +141,7 @@ export class Character {
                         break;
                     case "trap":
                         this.world.audioService.playLandslideAudio();
-                        this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.spriteService.getSpriteSheet('dust')));
+                        this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.spriteService.getSpriteSheet(SpriteService.DUST)));
                         this.world.board.cells[this.position.y][this.position.x] = 7;
                         this.canMove = true;
                         break;
