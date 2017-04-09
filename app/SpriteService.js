@@ -1,6 +1,9 @@
 export class SpriteService {
-    constructor(progressCallback) {
+    constructor() {
         this.sheets = {};
+    }
+
+    loadResources(progressCallback) {
         for (let i = 0; i < resources.length; i++) {
             this._loadImage(resources[i].url)
                 .then(image => {

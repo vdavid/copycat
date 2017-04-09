@@ -9,13 +9,19 @@ const audioResources = [
 
 export class AudioService {
     /**
-     * @param {Number} masterVolume
+     * @param {Number} masterVolume A value from 0 to 1.
+     */
+    constructor(masterVolume) {
+        this.audios = {};
+        this.masterVolume = masterVolume;
+    }
+
+    /**
      * @param {function?} progressCallback No parameters.
      */
-    constructor(masterVolume, progressCallback) {
-        this.audios = {};
+    loadResources(progressCallback) {
         for (let i = 0; i < audioResources.length; i++) {
-            this._loadAudio(audioResources[i].url, masterVolume)
+            this._loadAudio(audioResources[i].url, this.masterVolume)
                 .then(audio => {
                     this.audios[audioResources[i].name] = audio;
                     progressCallback();

@@ -32,9 +32,12 @@ export class World {
 
         // resources
         this.loadedResourceCount = 0;
-        this.audioService = new AudioService(0.05, () => { this.updateProgress(); });
-        this.spriteService = new SpriteService(() => { this.updateProgress(); });
-        this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount(); // TODO: Resources might start loading earlier than this gets set – progress bar will be shit! Loading should come after instantiation!
+        this.audioService = new AudioService(0.05);
+        this.spriteService = new SpriteService();
+        this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
+        this.spriteService.loadResources(() => { this.updateProgress(); });
+        this.audioService.loadResources(() => { this.updateProgress(); });
+
         // levels
         this.levels = levels;
         this.currentLevel = 0;
