@@ -9,7 +9,6 @@ export class Menu {
         this.centerY = centerY;
         this.selection = 0;
         this.max = this.menuItems.length - 1;
-        this.cursor = this.parent.spriteService.getSpriteSheet('cursor');
         this.longestMenuItemName = Math.max(...(menuItems.map(menuItem => menuItem.name.length)));
     }
 
@@ -29,21 +28,16 @@ export class Menu {
         }
     }
 
-    // selectionne() {
-    // }
-
     render() {
         let width = this.longestMenuItemName * 6 + 60;
         this.context.fillStyle = "#fff1e8";
         // Draws the frame
-        this.parent.drawFrame(this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length);
+        this.parent.spriteService.drawFrame(this.parent.context, this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length, "#fff1e8");
         // Displays the title
         for (let i = 0; i < this.menuItems.length; i++) {
             this.parent.spriteService.write(this.parent.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
         // on affiche la selection
-        this.parent.spriteService.draw('cursor', this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
-//        console.log(this.context, this.cursor.image, 48, 0, 16, 16, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 16, 16);
-        //this.context.drawImage(this.cursor.image, 48, 0, 16, 16, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 16, 16);
+        this.parent.spriteService.draw('cursors', this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
     }
 }

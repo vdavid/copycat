@@ -57,7 +57,7 @@ export class World {
             selection: 0,
             render: function () {
                 this.context.fillStyle = "#fff1e8";
-                this.world.drawFrame(10, 10, this.world.width - 20, 200 - 20);
+                this.world.spriteService.drawFrame(this.world.context, 10, 10, this.world.width - 20, 200 - 20, "#fff1e8");
                 this.world.spriteService.write(this.world.context, "select level", this.world.width / 2, 25);
                 for (let i = 0; i < this.count; i++) {
                     if (i > this.world.lastLevel - 1) {
@@ -70,7 +70,7 @@ export class World {
                     this.world.spriteService.write(this.world.context, (i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
                 }
-                this.world.context.drawImage(this.world.spriteService.getSpriteSheet('cursor').image, 0, 16, 32, 32, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32, 32, 32);
+                this.world.spriteService.draw('cursor-frame', this.world.context, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32);
             },
             change: function (keyCode) {
                 if (keyCode === 38 && this.selection - 6 > 0) {
@@ -273,62 +273,36 @@ export class World {
         }
     }
 
-    drawFrame(x, y, width, height) {
-        this.context.fillStyle = "#fff1e8";
-        // Draws background
-        this.context.fillRect(x + 1, y + 1, width - 2, height - 2);
-
-        // Draws edges
-
-        /* Top left */
-        let cursorSpriteSheet = this.spriteService.getSpriteSheet('cursor').image;
-        this.context.drawImage(cursorSpriteSheet, 32, 16, 16, 16, x, y, 16, 16);
-        /* Top right */
-        this.context.drawImage(cursorSpriteSheet, 32 + 8, 16, 16, 16, x + width - 16, y, 16, 16);
-        /* Bottom left */
-        this.context.drawImage(cursorSpriteSheet, 32, 16 + 8, 16, 16, x, y + height - 16, 16, 16);
-        /* Bottom right */
-        this.context.drawImage(cursorSpriteSheet, 32 + 8, 16 + 8, 16, 16, x + width - 16, y + height - 16, 16, 16);
-        /* Top */
-        this.context.drawImage(cursorSpriteSheet, 32 + 4, 16, 16, 16, x + 16, y, width - 32, 16);
-        /* Bottom */
-        this.context.drawImage(cursorSpriteSheet, 32 + 4, 16 + 8, 16, 16, x + 16, y + height - 16, width - 32, 16);
-        /* Left */
-        this.context.drawImage(cursorSpriteSheet, 32, 16 + 4, 16, 16, x, y + 16, 16, height - 32);
-        /* Right */
-        this.context.drawImage(cursorSpriteSheet, 32 + 8, 16 + 4, 16, 16, x + width - 16, y + 16, 16, height - 32);
-    }
-
     bitMasking() {
         this.board.apparence = [];
-        for (let j = 0; j < this.board.size.height; j++) {
-            for (let i = 0; i < this.board.size.width; i++) {
-                let id = this.board.cells[j][i];
+        for (let y = 0; y < this.board.size.height; y++) {
+            for (let x = 0; x < this.board.size.width; x++) {
+                let id = this.board.cells[y][x];
                 // up left right down
                 let neighbor = [0, 0, 0, 0];
-                if (j - 1 > -1) {
-                    if (id === this.board.cells[j - 1][i]) {
+                if (y - 1 > -1) {
+                    if (id === this.board.cells[y - 1][x]) {
                         neighbor[0] = 1; //up
                     }
                 } else {
                     neighbor[0] = 1;
                 }
-                if (i - 1 > -1) {
-                    if (id === this.board.cells[j][i - 1]) {
+                if (x - 1 > -1) {
+                    if (id === this.board.cells[y][x - 1]) {
                         neighbor[1] = 1; // left
                     }
                 } else {
                     neighbor[1] = 1;
                 }
-                if (i + 1 < this.board.size.width) {
-                    if (id === this.board.cells[j][i + 1]) {
+                if (x + 1 < this.board.size.width) {
+                    if (id === this.board.cells[y][x + 1]) {
                         neighbor[2] = 1; // right
                     }
                 } else {
                     neighbor[2] = 1;
                 }
-                if (j + 1 < this.board.size.height) {
-                    if (id === this.board.cells[j + 1][i]) {
+                if (y + 1 < this.board.size.height) {
+                    if (id === this.board.cells[y + 1][x]) {
                         neighbor[3] = 1; // down
                     }
                 } else {
@@ -383,7 +357,7 @@ export class World {
             }
         }
         if (this.levels[this.currentLevel].comment) {
-            this.drawFrame(0, this.height - 32, this.width, 32);
+            this.spriteService.drawFrame(this.context, 0, this.height - 32, this.width, 32, "#fff1e8");
             this.spriteService.write(this.context, this.levels[this.currentLevel].comment, this.width / 2, this.height - 20);
         }
 
@@ -442,7 +416,7 @@ export class World {
         this.isStopped = true;
 
         this.context.fillStyle = "black";
-        let x = 0;
+        let height = 0;
         let targetX = this.height / 2;
         let currentX = 0;
         let world = this;
@@ -452,9 +426,9 @@ export class World {
         function animate() {
             let time = new Date() - world.transition.time;
             if (time < world.transition.duration) {
-                world.context.fillRect(0, 0, world.width, x);
-                world.context.fillRect(0, world.height, world.width, x * -1);
-                x = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
+                world.context.fillRect(0, 0, world.width, height);
+                world.context.fillRect(0, world.height, world.width, height * -1);
+                height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
                 requestAnimationFrame(animate);
             } else {
                 if (world.currentLevel < world.levels.length) {
@@ -472,7 +446,7 @@ export class World {
 
     intro() {
         this.initializeMap();
-        let x = this.height / 2;
+        let height = this.height / 2;
         let targetX = 0;
         let currentX = this.height / 2;
         let world = this;
@@ -484,9 +458,9 @@ export class World {
             if (time < world.transition.duration) {
                 world.renderTerrain();
                 world.context.fillStyle = "black";
-                world.context.fillRect(0, 0, world.width, x);
-                world.context.fillRect(0, world.height, world.width, x * -1);
-                x = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
+                world.context.fillRect(0, 0, world.width, height);
+                world.context.fillRect(0, world.height, world.width, height * -1);
+                height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
                 requestAnimationFrame(animate);
             } else {
 
