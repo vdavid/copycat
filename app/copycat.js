@@ -25,26 +25,6 @@ Math.easeInOutQuart = function (t, b, c, d) {
 let settings = {
     tileSize: 16,
     zoom: 2,
-    // spriteSheets: [
-    //     {url: "./resources/images/font.png", name: "pixelFont"},
-    //     {url: "./resources/images/cursor.png", name: "cursor"},
-    //     {url: "./resources/images/title.png", name: "title"},
-    //     {url: "./resources/images/player.png", name: "playerSprite", columnCount: 12, rowCount: 1},
-    //     {url: "./resources/images/explosion.png", name: "explosion", columnCount: 9, rowCount: 1},
-    //     {url: "./resources/images/tiles.png", name: "tiles"},
-    //     {url: "./resources/images/exit.png", name: "exit", columnCount: 10},
-    //     {url: "./resources/images/dust.png", name: "dust", columnCount: 9, rowCount: 1},
-    //     {url: "./resources/images/pattern.png", name: "pattern"},
-    //     {url: "./resources/images/lock.png", name: "lock"}
-    // ],
-    // sounds: [
-    //     {url: "./resources/sounds/NFF-select-04.wav", name: "movement"},
-    //     {url: "./resources/sounds/NFF-select.wav", name: "selection"},
-    //     {url: "./resources/sounds/NFF-bravo.wav", name: "bravo"},
-    //     {url: "./resources/sounds/NFF-click-switch.wav", name: "validation"},
-    //     {url: "./resources/sounds/NFF-bubble-input.wav", name: "appearance"},
-    //     {url: "./resources/sounds/NFF-moving-block.wav", name: "landslide"},
-    // ],
     keys: [
         {type: "tile", name: "water", id: 0, collision: true, apparence: "auto", rowIndex: 3},
         {type: "tile", name: "grass", id: 1, collision: false, apparence: 1},
