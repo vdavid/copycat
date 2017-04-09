@@ -1,7 +1,7 @@
 import {Menu} from "./Menu";
 import {Character} from "./Character";
 import {ArrayChunker} from "./ArrayChunker";
-import {SoundBox} from "./SoundBox";
+import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 
 export class World {
@@ -19,9 +19,9 @@ export class World {
         this.createContext();
         // resources
         this.loadedResourceCount = 0;
-        this.soundBox = new SoundBox(0.05, () => { this.updateProgress(); });
+        this.audioService = new AudioService(0.05, () => { this.updateProgress(); });
         this.spriteService = new SpriteService(() => { this.updateProgress(); });
-        this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + SoundBox.getSupportedSoundCount(); // TODO: Resources might start loading earlier than this gets set – progress bar will be shit! Loading should come after instantiation!
+        this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount(); // TODO: Resources might start loading earlier than this gets set – progress bar will be shit! Loading should come after instantiation!
         // levels
         this.levels = levels;
         this.currentLevel = 0;
@@ -47,7 +47,7 @@ export class World {
                 for (let i = 0; i < this.count; i++) {
                     if (i > this.world.lastLevel - 1) {
                         this.context.globalAlpha = 0.6;
-                        this.world.context.drawImage(this.world.spriteService.getSpriteSheet('lock').image, (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getSpriteSheet('lock').image.width / 2, (64 + Math.floor(i / 7) * 32) + 10);
+                        this.world.context.drawImage(this.world.spriteService.getLockImage(), (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getSpriteSheet.getLockImage().width / 2, (64 + Math.floor(i / 7) * 32) + 10);
                     }
                     this.world.write((i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
@@ -57,25 +57,25 @@ export class World {
             change: function (keyCode) {
                 if (keyCode === 38 && this.selection - 6 > 0) {
                     // up
-                    this.world.soundBox.playSelectionAudio();
+                    this.world.audioService.playSelectionAudio();
                     this.selection -= 7;
                     this.render();
                 }
                 if (keyCode === 40 && this.selection + 7 < this.world.lastLevel) {
                     // down
-                    this.world.soundBox.playSelectionAudio();
+                    this.world.audioService.playSelectionAudio();
                     this.selection += 7;
                     this.render();
                 }
                 if (keyCode === 37 && this.selection > 0) {
                     // left
-                    this.world.soundBox.playSelectionAudio();
+                    this.world.audioService.playSelectionAudio();
                     this.selection -= 1;
                     this.render();
                 }
                 if (keyCode === 39 && this.selection + 1 < this.world.lastLevel) {
                     // right
-                    this.world.soundBox.playSelectionAudio();
+                    this.world.audioService.playSelectionAudio();
                     this.selection += 1;
                     this.render();
                 }
@@ -170,11 +170,11 @@ export class World {
                 break;
             case "start":
                 if (this.buttons[69] && this.animation) {
-                    this.soundBox.playValidationAudio();
+                    this.audioService.playValidationAudio();
                     this.phase("menu")
                 }
                 if (this.buttons[82] && this.animation) {
-                    this.soundBox.playValidationAudio();
+                    this.audioService.playValidationAudio();
                     cancelAnimationFrame(this.animation);
                     this.animation = null;
                     this.isStopped = true;
@@ -183,26 +183,26 @@ export class World {
                 break;
             case "fin":
                 if (this.buttons[67]) {
-                    this.soundBox.playValidationAudio();
+                    this.audioService.playValidationAudio();
                     this.phase("menu")
                 }
                 break;
             case "rules":
                 if (this.buttons[67]) {
-                    this.soundBox.playValidationAudio();
+                    this.audioService.playValidationAudio();
                     this.phase("menu")
                 }
                 break;
             case "info":
                 if (this.buttons[67]) {
-                    this.soundBox.playValidationAudio();
+                    this.audioService.playValidationAudio();
                     this.phase("menu")
                 }
                 break;
             case "levels":
                 this.menuLevels.change(event.keyCode);
                 if (this.buttons[67]) {
-                    this.soundBox.playValidationAudio();
+                    this.audioService.playValidationAudio();
                     this.phase("menu")
                 }
                 if (this.buttons[88]) {
@@ -594,7 +594,7 @@ export class World {
                         localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
                     }
                     this.outro();
-                    this.soundBox.playSuccessAudio();
+                    this.audioService.playSuccessAudio();
                 }
 
                 break;

@@ -29,7 +29,7 @@ export class Character {
         this.canMove = true;
         this.collision = false;
         this.validation = false;
-        this.world.soundBox.playAppearanceAudio();
+        this.world.audioService.playAppearanceAudio();
         this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.spriteService.getSpriteSheet('explosion')));
     }
 
@@ -119,27 +119,27 @@ export class Character {
                         this.canMove = this.collision;
                         break;
                     case "left":
-                        this.world.soundBox.playValidationAudio();
+                        this.world.audioService.playValidationAudio();
                         this.canMove = false;
                         this.navigate("left");
                         break;
                     case "up":
-                        this.world.soundBox.playValidationAudio();
+                        this.world.audioService.playValidationAudio();
                         this.canMove = false;
                         this.navigate("up");
                         break;
                     case "down":
-                        this.world.soundBox.playValidationAudio();
+                        this.world.audioService.playValidationAudio();
                         this.canMove = false;
                         this.navigate("down");
                         break;
                     case "right":
-                        this.world.soundBox.playValidationAudio();
+                        this.world.audioService.playValidationAudio();
                         this.canMove = false;
                         this.navigate("right");
                         break;
                     case "trap":
-                        this.world.soundBox.playLandslideAudio();
+                        this.world.audioService.playLandslideAudio();
                         this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.spriteService.getSpriteSheet('dust')));
                         this.world.board.cells[this.position.y][this.position.x] = 7;
                         this.canMove = true;
@@ -150,7 +150,7 @@ export class Character {
                         this.world.action("nextLevel");
                         break;
                     default:
-                        this.world.soundBox.playMovementAudio();
+                        this.world.audioService.playMovementAudio();
                         this.canMove = true;
                         this.validation = false;
                     // sol normal

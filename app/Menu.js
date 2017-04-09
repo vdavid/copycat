@@ -15,16 +15,16 @@ export class Menu {
 
     change(keyCode) {
         if (keyCode === KeyCodes.UP && this.selection > 0) {
-            this.parent.soundBox.playSelectionAudio();
+            this.parent.audioService.playSelectionAudio();
             this.selection -= 1;
             this.render();
         } else if (keyCode === KeyCodes.DOWN && this.selection < this.max) {
-            this.parent.soundBox.playSelectionAudio();
+            this.parent.audioService.playSelectionAudio();
             this.selection += 1;
             this.render();
         } else if (keyCode === KeyCodes.X) {
             // select
-            this.parent.soundBox.playValidationAudio();
+            this.parent.audioService.playValidationAudio();
             this.parent.phase(this.menuItems[this.selection].link);
         }
     }

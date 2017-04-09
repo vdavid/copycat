@@ -7,7 +7,7 @@ const audioResources = [
     {name: "landslide", url: "./resources/sounds/NFF-moving-block.wav"},
 ];
 
-export class SoundBox {
+export class AudioService {
     /**
      * @param {Number} masterVolume
      * @param {function?} progressCallback No parameters.
@@ -17,7 +17,6 @@ export class SoundBox {
         for (let i = 0; i < audioResources.length; i++) {
             this._loadAudio(audioResources[i].url, masterVolume)
                 .then(audio => {
-                    console.log('Audio loaded: ' + audioResources[i].name);
                     this.audios[audioResources[i].name] = audio;
                     progressCallback();
                 })

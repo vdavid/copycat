@@ -17,7 +17,6 @@ export class SpriteService {
         for (let i = 0; i < resources.length; i++) {
             this._loadImage(resources[i].url)
                 .then(image => {
-                    console.log('Image loaded: ' + resources[i].name);
                     this.sheets[resources[i].name] = {image: image, columnCount: resources[i].columnCount, rowCount: resources[i].rowCount};
                     progressCallback();
                 })
@@ -43,5 +42,9 @@ export class SpriteService {
             image.addEventListener('error', reject(new Error('Failed to load image with url: ' + url)));
             image.src = url;
         });
+    }
+
+    getLockImage() {
+        return this.sheets['lock'].image;
     }
 }
