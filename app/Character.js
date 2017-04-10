@@ -1,6 +1,7 @@
 import {Effect} from "./Effect";
 import {Sprite} from "./Sprite";
 import {SpriteService} from "./SpriteService";
+import {AudioService} from "./AudioService";
 
 export class Character {
     constructor(world, x, y, sprite) {
@@ -30,8 +31,8 @@ export class Character {
         this.canMove = true;
         this.collision = false;
         this.validation = false;
-        this.world.audioService.playAppearanceAudio();
-        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.spriteService.getSpriteSheet('explosion')));
+        this.world.audioService.play(AudioService.APPEARANCE);
+        this.world.effects.push(new Effect(this.world, this.currentLocation.x, this.currentLocation.y, this.world.spriteService.getSpriteSheet(SpriteService.EXPLOSION)));
     }
 
     control() {
@@ -120,27 +121,27 @@ export class Character {
                         this.canMove = this.collision;
                         break;
                     case "left":
-                        this.world.audioService.playValidationAudio();
+                        this.world.audioService.play(AudioService.VALIDATION);
                         this.canMove = false;
                         this.navigate("left");
                         break;
                     case "up":
-                        this.world.audioService.playValidationAudio();
+                        this.world.audioService.play(AudioService.VALIDATION);
                         this.canMove = false;
                         this.navigate("up");
                         break;
                     case "down":
-                        this.world.audioService.playValidationAudio();
+                        this.world.audioService.play(AudioService.VALIDATION);
                         this.canMove = false;
                         this.navigate("down");
                         break;
                     case "right":
-                        this.world.audioService.playValidationAudio();
+                        this.world.audioService.play(AudioService.VALIDATION);
                         this.canMove = false;
                         this.navigate("right");
                         break;
                     case "trap":
-                        this.world.audioService.playLandslideAudio();
+                        this.world.audioService.play(AudioService.MOVEMENT);
                         this.world.effects.push(new Effect(this.world, this.position.x * this.tileSize, this.position.y * this.tileSize, this.world.spriteService.getSpriteSheet(SpriteService.DUST)));
                         this.world.board.cells[this.position.y][this.position.x] = 7;
                         this.canMove = true;
@@ -151,7 +152,7 @@ export class Character {
                         this.world.action("nextLevel");
                         break;
                     default:
-                        this.world.audioService.playMovementAudio();
+                        this.world.audioService.play(AudioService.MOVEMENT);
                         this.canMove = true;
                         this.validation = false;
                     // sol normal

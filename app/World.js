@@ -63,37 +63,37 @@ export class World {
                     if (i > this.world.lastLevel - 1) {
                         this.context.globalAlpha = 0.6;
 
-                        this.world.spriteService.draw(SpriteService.LOCK_SPRITE, this.world.context,
+                        this.world.spriteService.draw(SpriteService.LOCK, this.world.context,
                             (32 + Math.floor(i % 7) * 32) - this.world.spriteService.getLockImage().width / 2,
                             (64 + Math.floor(i / 7) * 32) + 10);
                     }
                     this.world.spriteService.write(this.world.context, (i + 1).toString(), 32 + Math.floor(i % 7) * 32, 64 + Math.floor(i / 7) * 32);
                     this.context.globalAlpha = 1;
                 }
-                this.world.spriteService.draw('cursor-frame', this.world.context, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32);
+                this.world.spriteService.draw(SpriteService.CURSOR_FRAME, this.world.context, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32);
             },
             change: function (keyCode) {
                 if (keyCode === 38 && this.selection - 6 > 0) {
                     // up
-                    this.world.audioService.playSelectionAudio();
+                    this.world.audioService.play(AudioService.SELECTION);
                     this.selection -= 7;
                     this.render();
                 }
                 if (keyCode === 40 && this.selection + 7 < this.world.lastLevel) {
                     // down
-                    this.world.audioService.playSelectionAudio();
+                    this.world.audioService.play(AudioService.SELECTION);
                     this.selection += 7;
                     this.render();
                 }
                 if (keyCode === 37 && this.selection > 0) {
                     // left
-                    this.world.audioService.playSelectionAudio();
+                    this.world.audioService.play(AudioService.SELECTION);
                     this.selection -= 1;
                     this.render();
                 }
                 if (keyCode === 39 && this.selection + 1 < this.world.lastLevel) {
                     // right
-                    this.world.audioService.playSelectionAudio();
+                    this.world.audioService.play(AudioService.SELECTION);
                     this.selection += 1;
                     this.render();
                 }
@@ -172,11 +172,11 @@ export class World {
                 break;
             case "start":
                 if (this.buttons[69] && this.animation) {
-                    this.audioService.playValidationAudio();
+                    this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 if (this.buttons[82] && this.animation) {
-                    this.audioService.playValidationAudio();
+                    this.audioService.play(AudioService.VALIDATION);
                     cancelAnimationFrame(this.animation);
                     this.animation = null;
                     this.isStopped = true;
@@ -185,26 +185,26 @@ export class World {
                 break;
             case "fin":
                 if (this.buttons[67]) {
-                    this.audioService.playValidationAudio();
+                    this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 break;
             case "rules":
                 if (this.buttons[67]) {
-                    this.audioService.playValidationAudio();
+                    this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 break;
             case "info":
                 if (this.buttons[67]) {
-                    this.audioService.playValidationAudio();
+                    this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 break;
             case "levels":
                 this.menuLevels.change(event.keyCode);
                 if (this.buttons[67]) {
-                    this.audioService.playValidationAudio();
+                    this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 if (this.buttons[88]) {
@@ -325,7 +325,7 @@ export class World {
                 if (this.keys[id].apparence === "auto") {
                     sourceX = Math.floor(this.board.apparence[j][i]) * this.tileSize;
                     sourceY = Math.floor(this.board.apparence[j][i]) * this.tileSize;
-                    this.context.drawImage(this.spriteService.getSpriteSheet('tiles').image,
+                    this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TILES).image,
                         sourceX, this.keys[id].rowIndex * this.tileSize, this.tileSize, this.tileSize,
                         i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 } else if (this.keys[id].type === "sprite") {
@@ -347,7 +347,7 @@ export class World {
                 } else {
                     sourceX = Math.floor(this.keys[id].apparence % 16) * this.tileSize;
                     sourceY = Math.floor(this.keys[id].apparence / 16) * this.tileSize;
-                    this.context.drawImage(this.spriteService.getSpriteSheet('tiles').image, sourceX, sourceY, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+                    this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TILES).image, sourceX, sourceY, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 }
             }
         }
@@ -390,7 +390,7 @@ export class World {
         this.cats = [];
         let posCat = this.findKey("player");
         for (let i = 0; i < posCat.length; i++) {
-            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet('playerSprite')));
+            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet(SpriteService.PLAYER)));
         }
     }
 
@@ -480,11 +480,11 @@ export class World {
         this.context.fillRect(0, 0, this.width, this.height);
         switch (phase) {
             case "menu": // Displays game menu
-                let pattern = this.context.createPattern(this.spriteService.getSpriteSheet('pattern').image, "repeat");
+                let pattern = this.context.createPattern(this.spriteService.getSpriteSheet(SpriteService.PATTERN).image, "repeat");
                 this.context.fillStyle = pattern;
                 this.context.fillRect(0, 0, this.width, this.height);
 
-                this.context.drawImage(this.spriteService.getSpriteSheet('title').image, 0, 0);
+                this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TITLE).image, 0, 0);
                 this.menu.render();
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 18);
@@ -552,7 +552,7 @@ export class World {
                         localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
                     }
                     this.outro();
-                    this.audioService.playSuccessAudio();
+                    this.audioService.play(AudioService.SUCCESS);
                 }
 
                 break;

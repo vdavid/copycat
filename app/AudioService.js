@@ -1,12 +1,3 @@
-const audioResources = [
-    {name: "movement", url: "./resources/sounds/NFF-select-04.wav"},
-    {name: "selection", url: "./resources/sounds/NFF-select.wav"},
-    {name: "bravo", url: "./resources/sounds/NFF-bravo.wav"},
-    {name: "validation", url: "./resources/sounds/NFF-click-switch.wav"},
-    {name: "appearance", url: "./resources/sounds/NFF-bubble-input.wav"},
-    {name: "landslide", url: "./resources/sounds/NFF-moving-block.wav"},
-];
-
 export class AudioService {
     /**
      * @param {Number} masterVolume A value from 0 to 1.
@@ -48,27 +39,23 @@ export class AudioService {
         return audioResources.length;
     }
 
-    playMovementAudio() {
-        this.audios['movement'].play();
-    }
-
-    playSelectionAudio() {
-        this.audios['selection'].play();
-    }
-
-    playSuccessAudio() {
-        this.audios['bravo'].play();
-    }
-
-    playValidationAudio() {
-        this.audios['validation'].play();
-    }
-
-    playAppearanceAudio() {
-        this.audios['appearance'].play();
-    }
-
-    playLandslideAudio() {
-        this.audios['landslide'].play();
+    play(id) {
+        this.audios[id].play()
     }
 }
+
+AudioService.MOVEMENT = Symbol('MOVEMENT');
+AudioService.SELECTION = Symbol('SELECTION');
+AudioService.SUCCESS = Symbol('SUCCESS');
+AudioService.VALIDATION = Symbol('VALIDATION');
+AudioService.APPEARANCE = Symbol('APPEARANCE');
+AudioService.LANDSLIDE = Symbol('LANDSLIDE');
+
+const audioResources = [
+    {name: AudioService.MOVEMENT, url: "./resources/sounds/NFF-select-04.mp3"},
+    {name: AudioService.SELECTION, url: "./resources/sounds/NFF-select.mp3"},
+    {name: AudioService.SUCCESS, url: "./resources/sounds/NFF-bravo.mp3"},
+    {name: AudioService.VALIDATION, url: "./resources/sounds/NFF-click-switch.mp3"},
+    {name: AudioService.APPEARANCE, url: "./resources/sounds/NFF-bubble-input.mp3"},
+    {name: AudioService.LANDSLIDE, url: "./resources/sounds/NFF-moving-block.mp3"},
+];

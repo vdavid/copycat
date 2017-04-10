@@ -1,4 +1,6 @@
 import {KeyCodes} from "./KeyCodes";
+import {AudioService} from "./AudioService";
+import {SpriteService} from "./SpriteService";
 
 export class Menu {
     constructor(parent, centerX, centerY, menuItems) {
@@ -14,16 +16,16 @@ export class Menu {
 
     change(keyCode) {
         if (keyCode === KeyCodes.UP && this.selection > 0) {
-            this.parent.audioService.playSelectionAudio();
+            this.parent.audioService.play(AudioService.SELECTION);
             this.selection -= 1;
             this.render();
         } else if (keyCode === KeyCodes.DOWN && this.selection < this.max) {
-            this.parent.audioService.playSelectionAudio();
+            this.parent.audioService.play(AudioService.SELECTION);
             this.selection += 1;
             this.render();
         } else if (keyCode === KeyCodes.X) {
             // select
-            this.parent.audioService.playValidationAudio();
+            this.parent.audioService.play(AudioService.VALIDATION);
             this.parent.phase(this.menuItems[this.selection].link);
         }
     }
@@ -38,6 +40,6 @@ export class Menu {
             this.parent.spriteService.write(this.parent.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
         // on affiche la selection
-        this.parent.spriteService.draw('arrows', this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
+        this.parent.spriteService.draw(SpriteService.ARROWS, this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
     }
 }

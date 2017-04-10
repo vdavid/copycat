@@ -1,4 +1,5 @@
 import {World} from "./World";
+import {SpriteService} from "./SpriteService";
 import {levels} from "./data/levels";
 //noinspection ES6UnusedImports
 import css from "./copycat.css";
@@ -30,7 +31,7 @@ let settings = {
         {type: "tile", name: "grass", id: 1, collision: false, apparence: 1},
         {type: "tile", name: "wall", id: 2, collision: true, apparence: "auto", rowIndex: 1},
         {type: "tile", name: "ice", action: "slide", id: 3, collision: false, apparence: "auto", rowIndex: 2},
-        {type: "sprite", name: "nextLevel", id: 4, collision: false, action: "nextLevel", apparence: "exit", rowIndex: 2, allure: 0.3},
+        {type: "sprite", name: "nextLevel", id: 4, collision: false, action: "nextLevel", apparence: SpriteService.EXIT, rowIndex: 2, allure: 0.3},
         {type: "tile", name: "player", id: 5, collision: false, apparence: 5},
         {type: "tile", name: "trap", action: "trap", id: 6, collision: false, apparence: 6},
         {type: "tile", name: "hole", id: 7, collision: true, apparence: 7},

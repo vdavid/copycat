@@ -23,10 +23,10 @@ export class SpriteService {
     write(context, text, centerX, centerY) {
         let alphabet = "abcdefghijklmnopqrstuvwxyz0123456789 ?!():'";
 
-        let characterWidth = this.sheets['pixelFont'].spriteWidth;
+        let characterWidth = this.sheets[SpriteService.FONT].spriteWidth;
         let textLengthInPixels = text.length * characterWidth;
         for (let i = 0; i < text.length; i++) {
-            this.draw('pixelFont', context, (centerX - textLengthInPixels / 2) + (i * characterWidth), centerY, alphabet.indexOf(text.charAt(i)), 0);
+            this.draw(SpriteService.FONT, context, (centerX - textLengthInPixels / 2) + (i * characterWidth), centerY, alphabet.indexOf(text.charAt(i)), 0);
         }
     }
 
@@ -36,25 +36,25 @@ export class SpriteService {
         /* Draws background */
         context.fillRect(x + 1, y + 1, width - 2, height - 2);
 
-        let spriteWidth = this.getSpriteSheet('frame').spriteWidth;
-        let spriteHeight = this.getSpriteSheet('frame').spriteHeight;
+        let spriteWidth = this.getSpriteSheet(SpriteService.FRAME).spriteWidth;
+        let spriteHeight = this.getSpriteSheet(SpriteService.FRAME).spriteHeight;
 
         /* Top left */
-        this.draw('frame', context, x, y, 0, 0);
+        this.draw(SpriteService.FRAME, context, x, y, 0, 0);
         /* Top right */
-        this.draw('frame', context, x + width - spriteWidth, y, 2, 0);
+        this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y, 2, 0);
         /* Bottom left */
-        this.draw('frame', context, x, y + height - spriteHeight, 0, 2);
+        this.draw(SpriteService.FRAME, context, x, y + height - spriteHeight, 0, 2);
         /* Bottom right */
-        this.draw('frame', context, x + width - spriteWidth, y + height - spriteHeight, 2, 2);
+        this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y + height - spriteHeight, 2, 2);
         /* Top */
-        this.draw('frame', context, x + spriteWidth, y, 1, 0, width - 2 * spriteWidth, spriteHeight);
+        this.draw(SpriteService.FRAME, context, x + spriteWidth, y, 1, 0, width - 2 * spriteWidth, spriteHeight);
         /* Bottom */
-        this.draw('frame', context, x + spriteWidth, y + height - spriteHeight, 1, 2, width - 2 * spriteWidth, spriteHeight);
+        this.draw(SpriteService.FRAME, context, x + spriteWidth, y + height - spriteHeight, 1, 2, width - 2 * spriteWidth, spriteHeight);
         /* Left */
-        this.draw('frame', context, x, y + spriteHeight, 0, 1, spriteWidth, height - 2 * spriteHeight);
+        this.draw(SpriteService.FRAME, context, x, y + spriteHeight, 0, 1, spriteWidth, height - 2 * spriteHeight);
         /* Right */
-        this.draw('frame', context, x + width - spriteWidth, y + spriteHeight, 2, 1, spriteWidth, height - 2 * spriteHeight);
+        this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y + spriteHeight, 2, 1, spriteWidth, height - 2 * spriteHeight);
     }
 
     /**
@@ -98,25 +98,35 @@ export class SpriteService {
     }
 
     getLockImage() {
-        return this.sheets[SpriteService.LOCK_SPRITE].image;
+        return this.sheets[SpriteService.LOCK].image;
     }
 }
 
-SpriteService.LOCK_SPRITE = Symbol('LOCK');
+SpriteService.ARROWS = Symbol('ARROWS');
+SpriteService.CURSOR_FRAME = Symbol('CURSOR_FRAME');
 SpriteService.DUST = Symbol('DUST');
+SpriteService.EXIT = Symbol('EXIT');
+SpriteService.EXPLOSION = Symbol('EXPLOSION');
+SpriteService.FONT = Symbol('FONT');
+SpriteService.FRAME = Symbol('FRAME');
+SpriteService.LOCK = Symbol('LOCK');
+SpriteService.PLAYER = Symbol('PLAYER');
+SpriteService.TILES = Symbol('TILES');
+SpriteService.TITLE = Symbol('TITLE');
+SpriteService.PATTERN = Symbol('PATTERN');
 
 const resources = [
-    {name: "arrows", url: "./resources/images/arrows.png", columnCount: 4, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: "cursor-frame", url: "./resources/images/cursor-frame.png", columnCount: 1, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
+    {name: SpriteService.ARROWS, url: "./resources/images/arrows.png", columnCount: 4, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {name: SpriteService.CURSOR_FRAME, url: "./resources/images/cursor-frame.png", columnCount: 1, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
     {name: SpriteService.DUST, url: "./resources/images/dust.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
-    {name: "exit", url: "./resources/images/exit.png", columnCount: 10, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: "explosion", url: "./resources/images/explosion.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
-    {name: "frame", url: "./resources/images/frame.png", columnCount: 1, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: SpriteService.LOCK_SPRITE, url: "./resources/images/lock.png", columnCount: 1, rowCount: 1, spriteWidth: 8, spriteHeight: 11},
-    {name: "pixelFont", url: "./resources/images/font.png", columnCount: 44, rowCount: 1, spriteWidth: 6, spriteHeight: 9},
-    {name: "playerSprite", url: "./resources/images/player.png", columnCount: 12, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: "tiles", url: "./resources/images/tiles.png", columnCount: 16, rowCount: 5, spriteWidth: 16, spriteHeight: 16},
-    {name: "title", url: "./resources/images/title.png", columnCount: 1, rowCount: 1, spriteWidth: 256, spriteHeight: 149},
-    {name: "pattern", url: "./resources/images/pattern.png", columnCount: 2, rowCount: 2, spriteWidth: 16, spriteHeight: 16},
+    {name: SpriteService.EXIT, url: "./resources/images/exit.png", columnCount: 10, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {name: SpriteService.EXPLOSION, url: "./resources/images/explosion.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
+    {name: SpriteService.FONT, url: "./resources/images/font.png", columnCount: 44, rowCount: 1, spriteWidth: 6, spriteHeight: 9},
+    {name: SpriteService.FRAME, url: "./resources/images/frame.png", columnCount: 1, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {name: SpriteService.LOCK, url: "./resources/images/lock.png", columnCount: 1, rowCount: 1, spriteWidth: 8, spriteHeight: 11},
+    {name: SpriteService.PLAYER, url: "./resources/images/player.png", columnCount: 12, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {name: SpriteService.TILES, url: "./resources/images/tiles.png", columnCount: 16, rowCount: 5, spriteWidth: 16, spriteHeight: 16},
+    {name: SpriteService.TITLE, url: "./resources/images/title.png", columnCount: 1, rowCount: 1, spriteWidth: 256, spriteHeight: 149},
+    {name: SpriteService.PATTERN, url: "./resources/images/pattern.png", columnCount: 2, rowCount: 2, spriteWidth: 16, spriteHeight: 16},
 ];
 
