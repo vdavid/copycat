@@ -38,6 +38,6 @@ export class Menu {
             this.parent.spriteService.write(this.parent.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
         // on affiche la selection
-        this.parent.spriteService.draw('cursors', this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
+        this.parent.spriteService.draw('arrows', this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
     }
 }
