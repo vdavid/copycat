@@ -147,7 +147,7 @@ export class World {
         let CM = {};
         for (let i = 0; i < keys.length; i++) {
             let name = keys[i].id;
-            if (keys[i].type === "sprite") {
+            if (keys[i].type === "animated") {
                 keys[i].frame = 0;
                 keys[i].spriteSheet = this.spriteService.getSpriteSheet(keys[i].apparence);
                 keys[i].memoireBoucle = false;
@@ -322,12 +322,14 @@ export class World {
     renderTerrain() {
         for (let j = 0; j < this.board.size.height; j++) {
             for (let i = 0; i < this.board.size.width; i++) {
+                let spriteColumnIndex = 0;
+                let spriteRowIndex = 0;
+                let sprite = SpriteService.TILES;
                 let id = this.board.cells[j][i];
                 if (this.keys[id].apparence === "auto") {
-                    this.spriteService.draw(SpriteService.TILES, this.context,
-                        i * this.tileSize, j * this.tileSize,
-                        Math.floor(this.board.apparence[j][i]), this.keys[id].rowIndex);
-                } else if (this.keys[id].type === "sprite") {
+                    spriteColumnIndex = Math.floor(this.board.apparence[j][i]);
+                    spriteRowIndex = this.keys[id].rowIndex;
+                } else if (this.keys[id].type === "animated") {
                     if (!this.keys[id].memoireBoucle) {
                         if (this.keys[id].canAnimate) {
                             this.keys[id].frame += this.keys[id].allure;
@@ -342,13 +344,14 @@ export class World {
                         // on sait quel id est déjà passé :^)
                         this.nettoyer[id] = true;
                     }
-//                    this.spriteService.draw();
-                    this.context.drawImage(this.keys[id].spriteSheet.image, Math.floor(this.keys[id].frame) * this.tileSize, 0, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+                    sprite = this.keys[id].apparence;
+                    spriteColumnIndex = Math.floor(this.keys[id].frame);
+
                 } else {
-                    let sourceX = Math.floor(this.keys[id].apparence % 16) * this.tileSize;
-                    let sourceY = Math.floor(this.keys[id].apparence / 16) * this.tileSize;
-                    this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TILES).image, sourceX, sourceY, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+                    spriteColumnIndex = Math.floor(this.keys[id].apparence % 16);
+                    spriteRowIndex = Math.floor(this.keys[id].apparence / 16);
                 }
+                this.spriteService.draw(sprite, this.context, i * this.tileSize, j * this.tileSize, spriteColumnIndex, spriteRowIndex);
             }
         }
         for (let i = 0; i < this.nettoyer.length; i++) {
