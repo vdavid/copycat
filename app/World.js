@@ -1,6 +1,5 @@
 import {Menu} from "./Menu";
 import {Character} from "./Character";
-import {ArrayChunker} from "./ArrayChunker";
 import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 
@@ -313,21 +312,21 @@ export class World {
                 this.board.apparence.push(id);
             }
         }
-        this.board.apparence = ArrayChunker.chunkArray(this.board.apparence, this.board.size.width);
+        let temp = [];
+        for (let i = 0; i < this.board.apparence.length; i += this.board.size.width) {
+            temp.push(this.board.apparence.slice(i, i + this.board.size.width))
+        }
+        this.board.apparence = temp;
     }
 
     renderTerrain() {
-        let sourceX;
-        let sourceY;
         for (let j = 0; j < this.board.size.height; j++) {
             for (let i = 0; i < this.board.size.width; i++) {
                 let id = this.board.cells[j][i];
                 if (this.keys[id].apparence === "auto") {
-                    sourceX = Math.floor(this.board.apparence[j][i]) * this.tileSize;
-                    sourceY = Math.floor(this.board.apparence[j][i]) * this.tileSize;
-                    this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TILES).image,
-                        sourceX, this.keys[id].rowIndex * this.tileSize, this.tileSize, this.tileSize,
-                        i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+                    this.spriteService.draw(SpriteService.TILES, this.context,
+                        i * this.tileSize, j * this.tileSize,
+                        Math.floor(this.board.apparence[j][i]), this.keys[id].rowIndex);
                 } else if (this.keys[id].type === "sprite") {
                     if (!this.keys[id].memoireBoucle) {
                         if (this.keys[id].canAnimate) {
@@ -343,10 +342,11 @@ export class World {
                         // on sait quel id est déjà passé :^)
                         this.nettoyer[id] = true;
                     }
+//                    this.spriteService.draw();
                     this.context.drawImage(this.keys[id].spriteSheet.image, Math.floor(this.keys[id].frame) * this.tileSize, 0, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 } else {
-                    sourceX = Math.floor(this.keys[id].apparence % 16) * this.tileSize;
-                    sourceY = Math.floor(this.keys[id].apparence / 16) * this.tileSize;
+                    let sourceX = Math.floor(this.keys[id].apparence % 16) * this.tileSize;
+                    let sourceY = Math.floor(this.keys[id].apparence / 16) * this.tileSize;
                     this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TILES).image, sourceX, sourceY, this.tileSize, this.tileSize, i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
                 }
             }

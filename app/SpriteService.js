@@ -48,17 +48,24 @@ export class SpriteService {
         /* Bottom right */
         this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y + height - spriteHeight, 2, 2);
         /* Top */
-        this.draw(SpriteService.FRAME, context, x + spriteWidth, y, 1, 0, width - 2 * spriteWidth, spriteHeight);
+        this.drawStretched(SpriteService.FRAME, context, x + spriteWidth, y, width - 2 * spriteWidth, spriteHeight, 1, 0);
         /* Bottom */
-        this.draw(SpriteService.FRAME, context, x + spriteWidth, y + height - spriteHeight, 1, 2, width - 2 * spriteWidth, spriteHeight);
+        this.drawStretched(SpriteService.FRAME, context, x + spriteWidth, y + height - spriteHeight, width - 2 * spriteWidth, spriteHeight, 1, 2);
         /* Left */
-        this.draw(SpriteService.FRAME, context, x, y + spriteHeight, 0, 1, spriteWidth, height - 2 * spriteHeight);
+        this.drawStretched(SpriteService.FRAME, context, x, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 0, 1);
         /* Right */
-        this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y + spriteHeight, 2, 1, spriteWidth, height - 2 * spriteHeight);
+        this.drawStretched(SpriteService.FRAME, context, x + width - spriteWidth, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 2, 1);
+    }
+
+    draw(sprite, context, x, y, columnIndex, rowIndex) {
+        this._draw(sprite, context, x, y, undefined, undefined, columnIndex, rowIndex)
+    }
+
+    drawStretched(sprite, context, x, y, width, height, columnIndex, rowIndex) {
+        this._draw(sprite, context, x, y, width, height, columnIndex, rowIndex)
     }
 
     /**
-     *
      * @param {string} sprite ID of the sprite to draw.
      * @param {CanvasRenderingContext2D} context Rendering context to use.
      * @param {Number} x Position on the canvas to render the sprite to. (left of the sprite)
@@ -68,7 +75,7 @@ export class SpriteService {
      * @param {Number?} width Width to stretch the sprite to. Default is the sprite's original width (no stretching).
      * @param {Number?} height Height to stretch the sprite to. Default is the sprite's original height (no stretching).
      */
-    draw(sprite, context, x, y, columnIndex, rowIndex, width, height) {
+    _draw(sprite, context, x, y, width, height, columnIndex, rowIndex) {
         columnIndex = columnIndex || 0;
         rowIndex = rowIndex || 0;
         let spriteSheet = this.sheets[sprite];
