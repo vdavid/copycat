@@ -42,7 +42,7 @@ export class Character {
         this._targetXInPixels = this._currentXInPixels;
         this._targetYInPixels = this._currentYInPixels;
 
-        this.sprite = new Sprite(this.context, tileSize, this._positionX, this._positionY, spriteId, spriteService);
+        this.sprite = new Sprite(this.context, this._positionX * tileSize, this._positionY * tileSize, spriteId, spriteService);
         this._transition = {
             isOn: false,
             time: null,
@@ -54,7 +54,7 @@ export class Character {
         this._collision = false;
         this.reachedAnExit = false;
         this.audioService.play(AudioService.APPEARANCE);
-        this.effects.push(new Effect(this.context, this.effects, this._currentXInPixels, this._currentYInPixels, SpriteService.EXPLOSION, this.world.spriteService));
+        this.effects.push(new Effect(this.context, this.effects, this._currentXInPixels, this._currentYInPixels, SpriteService.EXPLOSION, this.spriteService));
     }
 
     control() {
@@ -113,7 +113,7 @@ export class Character {
         }
     }
 
-    translation() {
+    transition() {
         if (this._transition.isOn) {
             let elapsedTime = new Date() - this._transition.startDateTime;
             if (elapsedTime < this._transition.durationInMilliseconds) {
@@ -157,7 +157,7 @@ export class Character {
                         this.navigate(DIRECTION_RIGHT);
                         break;
                     case TileType.TRAP_ACTION:
-                        this.audioService.play(AudioService.MOVEMENT);
+                        this.audioService.play(AudioService.LANDSLIDE);
                         this.effects.push(new Effect(this.context, this.effects, this._positionX * this._tileSize, this._positionY * this._tileSize, SpriteService.DUST, this.spriteService));
                         this.board.tiles[this._positionY][this._positionX] = 7;
                         this._canMove = true;
@@ -179,7 +179,7 @@ export class Character {
 
     render() {
         this.sprite.render();
-        this.translation();
+        this.transition();
         this.control();
     }
 }
