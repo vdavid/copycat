@@ -19,6 +19,10 @@ export class TileRenderer {
         }
     }
 
+    get tileSizeInPixels() {
+        return this._tileSizeInPixels;
+    }
+
     renderMap(level) {
         for (let y = 0; y < level.height; y++) {
             for (let x = 0; x < level.width; x++) {

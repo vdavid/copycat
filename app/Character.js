@@ -20,71 +20,75 @@ export class Character {
      * @param x
      * @param y
      * @param {Symbol} spriteId
+     * @param {Number} tileSizeInPixels
      * @param {SpriteService} spriteService
      * @param {AudioService} audioService
      */
-    constructor(world, x, y, spriteId, spriteService, audioService) {
+    constructor(world, x, y, spriteId, tileSizeInPixels, spriteService, audioService) {
         this.world = world;
         this.context = world.context;
         this.buttons = world.buttons;
-        this.level = world.level;
-        this.effects = world.effects;
-        let tileSize = world.tileSize;
+        this._level = world.level;
+        this._effects = world.effects;
 
-        this.spriteService = spriteService;
-        this.audioService = audioService;
+        this._spriteService = spriteService;
+        this._audioService = audioService;
         this._positionX = x;
         this._positionY = y;
 
-        this._tileSize = tileSize;
-        this._currentXInPixels = this._positionX * this._tileSize;
-        this._currentYInPixels = this._positionY * this._tileSize;
+        this._tileSizeInPixels = tileSizeInPixels;
+        this._currentXInPixels = this._positionX * tileSizeInPixels;
+        this._currentYInPixels = this._positionY * tileSizeInPixels;
         this._targetXInPixels = this._currentXInPixels;
         this._targetYInPixels = this._currentYInPixels;
 
-        this.sprite = new Sprite(this.context, this._positionX * tileSize, this._positionY * tileSize, spriteId, spriteService);
+        this._sprite = new Sprite(this.context, this._positionX * tileSizeInPixels, this._positionY * tileSizeInPixels, spriteId, spriteService);
         this._transition = {
             isOn: false,
             time: null,
             durationInMilliseconds: 200,
             style: "walk"
         };
-        this.lastDirection = "none";
+        this._lastDirection = "none";
         this._canMove = true;
         this._collision = false;
-        this.reachedAnExit = false;
-        this.audioService.play(AudioService.APPEARANCE);
-        this.effects.push(new Effect(this.context, this.effects, this._currentXInPixels, this._currentYInPixels, SpriteService.EXPLOSION, this.spriteService));
+        this._hasReachedAnExit = false;
+        this._audioService.play(AudioService.APPEARANCE);
+        this._effects.push(new Effect(this.context, this._effects, this._currentXInPixels, this._currentYInPixels, SpriteService.EXPLOSION, this._spriteService));
+    }
+    
+    get hasReachedAnExit() {
+        return this._hasReachedAnExit;
     }
 
-    control() {
+    _control() {
         if (!this._transition.isOn && this._canMove) {
             if (this.buttons[KeyCodes.UP]) {
-                this.navigate(DIRECTION_UP);
+                this._navigate(DIRECTION_UP);
             }
             if (this.buttons[KeyCodes.RIGHT]) {
-                this.navigate(DIRECTION_RIGHT);
+                this._navigate(DIRECTION_RIGHT);
             }
             if (this.buttons[KeyCodes.LEFT]) {
-                this.navigate(DIRECTION_LEFT);
+                this._navigate(DIRECTION_LEFT);
             }
             if (this.buttons[KeyCodes.DOWN]) {
-                this.navigate(DIRECTION_DOWN);
+                this._navigate(DIRECTION_DOWN);
             }
         }
     }
 
-    navigate(direction) {
+    _navigate(direction) {
         if (!this._transition.isOn) {
             let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
             let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
 
             if (this._positionX + deltaX >= 0
-                && this._positionX + deltaX < this.level.width
+                && this._positionX + deltaX < this._level.width
                 && this._positionY + deltaY >= 0
-                && this._positionY + deltaY < this.level.height) {
-                this._isTargetTileAccessible = TileType.isAccessible(this.level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
-                this._targetTileAction = TileType.getAction(this.level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
+                && this._positionY + deltaY < this._level.height) {
+                this._isTargetTileAccessible = TileType.isAccessible(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
+                this._targetTileAction = TileType.getAction(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
             } else {
                 this._isTargetTileAccessible = false;
                 this._targetTileAction = TileType.NO_ACTION;
@@ -99,14 +103,14 @@ export class Character {
                     this._transition.durationInMilliseconds = 200;
                 }
                 this._collision = false;
-                this.reachedAnExit = false;
+                this._hasReachedAnExit = false;
                 this._transition.isOn = true;
-                this.lastDirection = direction;
+                this._lastDirection = direction;
                 this._transition.startDateTime = new Date();
                 this._positionX += deltaX;
                 this._positionY += deltaY;
-                this._targetXInPixels = this._positionX * this._tileSize;
-                this._targetYInPixels = this._positionY * this._tileSize;
+                this._targetXInPixels = this._positionX * this._tileSizeInPixels;
+                this._targetYInPixels = this._positionY * this._tileSizeInPixels;
             } else {
                 this._collision = true;
             }
@@ -118,59 +122,59 @@ export class Character {
             let elapsedTime = new Date() - this._transition.startDateTime;
             if (elapsedTime < this._transition.durationInMilliseconds) {
                 if (this._transition.style === TRANSITION_STYLE_WALK) {
-                    this.sprite.positionXInPixels = Math.easeInOutQuart(elapsedTime, this._currentXInPixels, this._targetXInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
-                    this.sprite.positionYInPixels = Math.easeInOutQuart(elapsedTime, this._currentYInPixels, this._targetYInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
+                    this._sprite.positionXInPixels = easeInOutQuart(elapsedTime, this._currentXInPixels, this._targetXInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
+                    this._sprite.positionYInPixels = easeInOutQuart(elapsedTime, this._currentYInPixels, this._targetYInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
                 } else {
-                    this.sprite.positionXInPixels = Math.linearTween(elapsedTime, this._currentXInPixels, this._targetXInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
-                    this.sprite.positionYInPixels = Math.linearTween(elapsedTime, this._currentYInPixels, this._targetYInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
+                    this._sprite.positionXInPixels = linearTween(elapsedTime, this._currentXInPixels, this._targetXInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
+                    this._sprite.positionYInPixels = linearTween(elapsedTime, this._currentYInPixels, this._targetYInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
                 }
             } else {
                 this._transition.isOn = false;
-                this.sprite.positionXInPixels = this._targetXInPixels;
-                this.sprite.positionYInPixels = this._targetYInPixels;
+                this._sprite.positionXInPixels = this._targetXInPixels;
+                this._sprite.positionYInPixels = this._targetYInPixels;
                 this._currentXInPixels = this._targetXInPixels;
                 this._currentYInPixels = this._targetYInPixels;
                 // Does different stuff depending on target tile type
                 switch (this._targetTileAction) {
                     case TileType.SLIDE_ACTION:
-                        this.navigate(this.lastDirection);
+                        this._navigate(this._lastDirection);
                         this._canMove = this._collision;
                         break;
                     case TileType.LEFT_ACTION:
-                        this.audioService.play(AudioService.VALIDATION);
+                        this._audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate(DIRECTION_LEFT);
+                        this._navigate(DIRECTION_LEFT);
                         break;
                     case TileType.UP_ACTION:
-                        this.audioService.play(AudioService.VALIDATION);
+                        this._audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate(DIRECTION_UP);
+                        this._navigate(DIRECTION_UP);
                         break;
                     case TileType.DOWN_ACTION:
-                        this.audioService.play(AudioService.VALIDATION);
+                        this._audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate(DIRECTION_DOWN);
+                        this._navigate(DIRECTION_DOWN);
                         break;
                     case TileType.RIGHT_ACTION:
-                        this.audioService.play(AudioService.VALIDATION);
+                        this._audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate(DIRECTION_RIGHT);
+                        this._navigate(DIRECTION_RIGHT);
                         break;
                     case TileType.TRAP_ACTION:
-                        this.audioService.play(AudioService.LANDSLIDE);
-                        this.effects.push(new Effect(this.context, this.effects, this._positionX * this._tileSize, this._positionY * this._tileSize, SpriteService.DUST, this.spriteService));
-                        this.level.setTileType(this._positionX, this._positionY, TileType.HOLE);
+                        this._audioService.play(AudioService.LANDSLIDE);
+                        this._effects.push(new Effect(this.context, this._effects, this._positionX * this._tileSizeInPixels, this._positionY * this._tileSizeInPixels, SpriteService.DUST, this._spriteService));
+                        this._level.setTileType(this._positionX, this._positionY, TileType.HOLE);
                         this._canMove = true;
                         break;
                     case TileType.EXIT_ACTION:
-                        this.reachedAnExit = true;
+                        this._hasReachedAnExit = true;
                         this._canMove = true;
                         this.world.checkLevelCompletion();
                         break;
                     default:
-                        this.audioService.play(AudioService.MOVEMENT);
+                        this._audioService.play(AudioService.MOVEMENT);
                         this._canMove = true;
-                        this.reachedAnExit = false;
+                        this._hasReachedAnExit = false;
                     // sol normal
                 }
             }
@@ -178,8 +182,19 @@ export class Character {
     }
 
     render() {
-        this.sprite.render();
+        this._sprite.render();
         this.transition();
-        this.control();
+        this._control();
     }
+}
+
+function linearTween(elapsedTime, startValue, amount, transitionDuration) {
+    return amount * elapsedTime / transitionDuration + startValue;
+}
+
+function easeInOutQuart(elapsedTime, startValue, changeAmount, transitionDuration) {
+    elapsedTime /= transitionDuration / 2;
+    if (elapsedTime < 1) return changeAmount / 2 * elapsedTime * elapsedTime * elapsedTime * elapsedTime + startValue;
+    elapsedTime -= 2;
+    return -changeAmount / 2 * (elapsedTime * elapsedTime * elapsedTime * elapsedTime - 2) + startValue;
 }

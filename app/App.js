@@ -8,34 +8,33 @@ import {Level} from "./Level";
 import {TileType} from "./TileType";
 
 export class App {
-    constructor(settings, levels) {
+    constructor(levels, tileSize, zoom) {
         // settings
-        this.tileSize = settings.tileSize;
+        this.zoom = zoom || 2;
+
         this.buttons = [];
-        this.zoom = settings.zoom || 2;
         this.remplissage = false;
-        this.state = "menu";
         // Frames per second
         //this.fps = 60;
+        this.width = tileSize * 16;
+        this.height = tileSize * 16;
 
+        /* Initializes HTML canvas */
         this.canvas = document.createElement("canvas");
-        this.context = this.canvas.getContext('2d');
-        this.width = this.tileSize * 16;
-        this.canvas.width = this.tileSize * 16;
-        this.height = this.tileSize * 16;
-        this.canvas.height = this.tileSize * 16;
+        this.canvas.width = tileSize * 16;
+        this.canvas.height = tileSize * 16;
         this.canvas.style.width = this.width * this.zoom + "px";
         this.canvas.style.height = this.height * this.zoom + "px";
+        document.body.appendChild(this.canvas);
+        this.context = this.canvas.getContext('2d');
         this.context.msImageSmoothingEnabled = false;
         this.context.imageSmoothingEnabled = false;
-        document.body.appendChild(this.canvas);
-        console.log('%c World created ', 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
 
-        // resources
+        /* Loads audio and image files */
         this.loadedResourceCount = 0;
         this.audioService = new AudioService(0.05);
         this.spriteService = new SpriteService();
-        this.tileRenderer = new TileRenderer(this.context, this.tileSize, this.spriteService);
+        this.tileRenderer = new TileRenderer(this.context, tileSize, this.spriteService);
         this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
         this.spriteService.loadResources(() => {
             this.updateProgress();
@@ -43,6 +42,8 @@ export class App {
         this.audioService.loadResources(() => {
             this.updateProgress();
         });
+
+        this.state = "menu";
 
         // levels
         this.levels = levels;
@@ -256,7 +257,7 @@ export class App {
                 world.context.fillStyle = "black";
                 world.context.fillRect(0, 0, world.width, height);
                 world.context.fillRect(0, world.height, world.width, height * -1);
-                height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
+                height = easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
                 requestAnimationFrame(animate);
             } else {
                 world.effects = [];
@@ -264,7 +265,7 @@ export class App {
                 let playerStartPositions = world.level.findAllTilesOfType(TileType.PLAYER);
                 for (let i = 0; i < playerStartPositions.length; i++) {
                     world.players.push(new Character(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
-                        world.spriteService, world.audioService));
+                        world.tileRenderer.tileSizeInPixels, world.spriteService, world.audioService));
                 }
 
                 world.animate();
@@ -291,7 +292,7 @@ export class App {
             if (time < world.transition.duration) {
                 world.context.fillRect(0, 0, world.width, height);
                 world.context.fillRect(0, world.height, world.width, height * -1);
-                height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
+                height = easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
                 requestAnimationFrame(animate);
             } else {
                 if (world.currentLevel < world.levels.length) {
@@ -369,7 +370,7 @@ export class App {
 
     checkLevelCompletion() {
         if (this.players.every(player => {
-                return player.reachedAnExit;
+                return player._hasReachedAnExit;
             })) {
             this.currentLevel += 1;
             if (this.lastLevel < this.currentLevel) {
@@ -380,4 +381,11 @@ export class App {
             this.audioService.play(AudioService.SUCCESS);
         }
     }
+}
+
+function easeInOutQuart(elapsedTime, startValue, changeAmount, transitionDuration) {
+    elapsedTime /= transitionDuration / 2;
+    if (elapsedTime < 1) return changeAmount / 2 * elapsedTime * elapsedTime * elapsedTime * elapsedTime + startValue;
+    elapsedTime -= 2;
+    return -changeAmount / 2 * (elapsedTime * elapsedTime * elapsedTime * elapsedTime - 2) + startValue;
 }
