@@ -1,7 +1,7 @@
 import {World} from "./World";
 import {SpriteService} from "./SpriteService";
 import {levels} from "./data/levels";
-//noinspection ES6UnusedImports
+//noinspection ES6UnusedImports,JSUnresolvedVariable
 import css from "./copycat.css";
 
 /* Utilities */
