@@ -14,7 +14,6 @@ export class World {
         this.zoom = settings.zoom || 2;
         this.remplissage = false;
         this.state = "menu";
-        this.keys = settings.keys;
         // Frames per second
         //this.fps = 60;
 
@@ -35,6 +34,7 @@ export class World {
         this.loadedResourceCount = 0;
         this.audioService = new AudioService(0.05);
         this.spriteService = new SpriteService();
+        this.tileRenderer = new TileRenderer(this.context, this.tileSize, this.spriteService);
         this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
         this.spriteService.loadResources(() => {
             this.updateProgress();
@@ -113,10 +113,6 @@ export class World {
         if (this.loadedResourceCount === this.totalResourceCount) {
             console.log('%c resources are loaded ' + this.loadedResourceCount + " of " + this.totalResourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
 
-            // Initialization + loading
-            this.nettoyer = new Array(TileType.getTileTypeCount()).fill(false);
-            this.loadResources(this.keys);
-
             // menu
             let menuItems = [{
                 name: "start game",
@@ -145,22 +141,6 @@ export class World {
             this.context.fillStyle = "#fff";
             this.context.fillRect(0, (this.height / 2) - 1, (this.loadedResourceCount * this.width) / this.totalResourceCount, 2);
         }
-    }
-
-    loadResources(keys) {
-        //  Key processing
-        let CM = {};
-        for (let i = 0; i < keys.length; i++) {
-            let name = keys[i].id;
-            if (keys[i].type === "animated") {
-                keys[i].frame = 0;
-                keys[i].spriteSheet = this.spriteService.getSpriteSheet(keys[i].apparence);
-                keys[i].memoireBoucle = false;
-                keys[i].canAnimate = true;
-            }
-            CM[name] = keys[i];
-        }
-        this.keys = CM;
     }
 
     /* Events */
@@ -308,43 +288,8 @@ export class World {
     }
 
     renderTerrain() {
-        for (let j = 0; j < this.board.size.height; j++) {
-            for (let i = 0; i < this.board.size.width; i++) {
-                let spriteColumnIndex = 0;
-                let oldId = this.board.tiles[j][i];
-                let tileTypeId = TileType.getNewIdByOldId(this.board.tiles[j][i]);
-                let spriteId = SpriteService.TILES;
-                let spriteRowIndex;
-                if (TileRenderer.isAnimated(tileTypeId)) {
-                    if (!this.keys[oldId].memoireBoucle) {
-                        if (this.keys[oldId].canAnimate) {
-                            this.keys[oldId].frame += TileRenderer.getSpeedOfAnimatedTile(tileTypeId);
-                        }
-                        if (this.keys[oldId].frame >= this.keys[oldId].spriteSheet.columnCount) {
-                            this.keys[oldId].frame = 0;
-                        }
-                        this.keys[oldId].memoireBoucle = true;
-                        // on sait quel id est déjà passé :^)
-                        this.nettoyer[oldId] = true;
-                    }
-                    spriteId = TileRenderer.getSpriteIdOfAnimatedTile(tileTypeId);
-                    spriteColumnIndex = Math.floor(this.keys[oldId].frame);
-                    spriteRowIndex = 0;
+        this.tileRenderer.renderTerrain(this.board);
 
-                } else {
-                    spriteColumnIndex = (TileRenderer.getColumnIndex(tileTypeId) === "auto")
-                        ? Math.floor(this.board.apparence[j][i])
-                        : TileRenderer.getColumnIndex(tileTypeId);
-                    spriteRowIndex = TileRenderer.getRowIndex(tileTypeId);
-                }
-                this.spriteService.draw(spriteId, this.context, i * this.tileSize, j * this.tileSize, spriteColumnIndex, spriteRowIndex);
-            }
-        }
-        for (let i = 0; i < this.nettoyer.length; i++) {
-            if (this.nettoyer[i]) {
-                this.keys[i].memoireBoucle = false;
-            }
-        }
         if (this.levels[this.currentLevel].comment) {
             this.spriteService.drawFrame(this.context, 0, this.height - 32, this.width, 32, "#fff1e8");
             this.spriteService.write(this.context, this.levels[this.currentLevel].comment, this.width / 2, this.height - 20);
@@ -378,10 +323,11 @@ export class World {
         /* Clears screen */
         this.context.fillStyle = "black";
         this.context.fillRect(0, 0, this.width, this.height);
+
         this.renderTerrain();
 
-        this.cats.forEach(cat => {
-            cat.render();
+        this.cats.forEach(player => {
+            player.render();
         });
         this.effects.forEach(effect => {
             effect.render();

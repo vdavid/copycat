@@ -1,8 +1,4 @@
 export class TileType {
-    static getTileTypeCount() {
-        return Object.keys(tileTypes).length;
-    }
-
     static getNewIdByOldId(oldId) {
         return tileTypeOldToNewIdMap[oldId];
     }
@@ -27,19 +23,19 @@ TileType.SLIDE_ACTION = Symbol('SLIDE_ACTION');
 TileType.TRAP_ACTION = Symbol('TRAP_ACTION');
 TileType.EXIT_ACTION = Symbol('EXIT_ACTION');
 
-TileType.WATER = Symbol('WATER');
-TileType.GRASS = Symbol('GRASS');
-TileType.WALL = Symbol('WALL');
-TileType.ICE = Symbol('ICE');
-TileType.EXIT = Symbol('EXIT');
-TileType.PLAYER = Symbol('PLAYER');
-TileType.TRAP = Symbol('TRAP');
-TileType.HOLE = Symbol('HOLE');
-TileType.FENCE = Symbol('FENCE');
-TileType.LEFT_ARROW = Symbol('LEFT_ARROW');
-TileType.UP_ARROW = Symbol('UP_ARROW');
-TileType.RIGHT_ARROW = Symbol('RIGHT_ARROW');
-TileType.DOWN_ARROW = Symbol('DOWN_ARROW');
+TileType.WATER = 'WATER';
+TileType.GRASS = 'GRASS';
+TileType.WALL = 'WALL';
+TileType.ICE = 'ICE';
+TileType.EXIT = 'EXIT';
+TileType.PLAYER = 'PLAYER';
+TileType.TRAP = 'TRAP';
+TileType.HOLE = 'HOLE';
+TileType.FENCE = 'FENCE';
+TileType.LEFT_ARROW = 'LEFT_ARROW';
+TileType.UP_ARROW = 'UP_ARROW';
+TileType.RIGHT_ARROW = 'RIGHT_ARROW';
+TileType.DOWN_ARROW = 'DOWN_ARROW';
 
 const tileTypeOldToNewIdMap = {
     0: TileType.WATER,
