@@ -7,7 +7,7 @@ export class SpriteService {
         for (let i = 0; i < resources.length; i++) {
             loadImage(resources[i].url)
                 .then(image => {
-                    this._sheets[resources[i].name] = {
+                    this._sheets[resources[i].id] = {
                         image: image,
                         columnCount: resources[i].columnCount,
                         rowCount: resources[i].rowCount,
@@ -68,8 +68,8 @@ export class SpriteService {
         draw(this._sheets[spriteId], context, x, y, width, height, columnIndex, rowIndex)
     }
 
-    getSpriteSheet(name) {
-        return this._sheets[name];
+    getSpriteSheet(spriteId) {
+        return this._sheets[spriteId];
     }
 
     static getSupportedSpriteSheetCount() {
@@ -98,18 +98,18 @@ SpriteService.PATTERN = Symbol('PATTERN');
 
 /* Defines resources */
 const resources = [
-    {name: SpriteService.ARROWS, url: "./resources/images/arrows.png", columnCount: 4, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: SpriteService.CURSOR_FRAME, url: "./resources/images/cursor-frame.png", columnCount: 1, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
-    {name: SpriteService.DUST, url: "./resources/images/dust.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
-    {name: SpriteService.EXIT, url: "./resources/images/exit.png", columnCount: 10, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: SpriteService.EXPLOSION, url: "./resources/images/explosion.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
-    {name: SpriteService.FONT, url: "./resources/images/font.png", columnCount: 44, rowCount: 1, spriteWidth: 6, spriteHeight: 9},
-    {name: SpriteService.FRAME, url: "./resources/images/frame.png", columnCount: 1, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: SpriteService.LOCK, url: "./resources/images/lock.png", columnCount: 1, rowCount: 1, spriteWidth: 8, spriteHeight: 11},
-    {name: SpriteService.PLAYER, url: "./resources/images/player.png", columnCount: 12, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
-    {name: SpriteService.TILES, url: "./resources/images/tiles.png", columnCount: 16, rowCount: 5, spriteWidth: 16, spriteHeight: 16},
-    {name: SpriteService.TITLE, url: "./resources/images/title.png", columnCount: 1, rowCount: 1, spriteWidth: 256, spriteHeight: 149},
-    {name: SpriteService.PATTERN, url: "./resources/images/pattern.png", columnCount: 2, rowCount: 2, spriteWidth: 16, spriteHeight: 16},
+    {id: SpriteService.ARROWS, url: "./resources/images/arrows.png", columnCount: 4, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {id: SpriteService.CURSOR_FRAME, url: "./resources/images/cursor-frame.png", columnCount: 1, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
+    {id: SpriteService.DUST, url: "./resources/images/dust.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
+    {id: SpriteService.EXIT, url: "./resources/images/exit.png", columnCount: 10, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {id: SpriteService.EXPLOSION, url: "./resources/images/explosion.png", columnCount: 9, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
+    {id: SpriteService.FONT, url: "./resources/images/font.png", columnCount: 44, rowCount: 1, spriteWidth: 6, spriteHeight: 9},
+    {id: SpriteService.FRAME, url: "./resources/images/frame.png", columnCount: 1, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {id: SpriteService.LOCK, url: "./resources/images/lock.png", columnCount: 1, rowCount: 1, spriteWidth: 8, spriteHeight: 11},
+    {id: SpriteService.PLAYER, url: "./resources/images/player.png", columnCount: 12, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
+    {id: SpriteService.TILES, url: "./resources/images/tiles.png", columnCount: 16, rowCount: 5, spriteWidth: 16, spriteHeight: 16},
+    {id: SpriteService.TITLE, url: "./resources/images/title.png", columnCount: 1, rowCount: 1, spriteWidth: 256, spriteHeight: 149},
+    {id: SpriteService.PATTERN, url: "./resources/images/pattern.png", columnCount: 2, rowCount: 2, spriteWidth: 16, spriteHeight: 16},
 ];
 
 /* Private static methods follow */

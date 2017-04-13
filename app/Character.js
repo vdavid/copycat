@@ -24,18 +24,25 @@ export class Character {
      */
     constructor(world, x, y, spriteId, spriteService, audioService) {
         this.world = world;
+        this.context = world.context;
+        this.buttons = world.buttons;
+        this.board = world.board;
+        this.effects = world.effects;
+        this.keys = world.keys;
+        let tileSize = world.tileSize;
+
         this.spriteService = spriteService;
         this.audioService = audioService;
         this._positionX = x;
         this._positionY = y;
-        
-        this._tileSize = world.tileSize;
+
+        this._tileSize = tileSize;
         this._currentXInPixels = this._positionX * this._tileSize;
         this._currentYInPixels = this._positionY * this._tileSize;
         this._targetXInPixels = this._currentXInPixels;
         this._targetYInPixels = this._currentYInPixels;
 
-        this.sprite = new Sprite(this.world.context, this.world.tileSize, this._positionX, this._positionY, spriteId, spriteService);
+        this.sprite = new Sprite(this.context, tileSize, this._positionX, this._positionY, spriteId, spriteService);
         this._transition = {
             isOn: false,
             time: null,
@@ -47,21 +54,21 @@ export class Character {
         this._collision = false;
         this.reachedAnExit = false;
         this.audioService.play(AudioService.APPEARANCE);
-        this.world.effects.push(new Effect(this.world, this._currentXInPixels, this._currentYInPixels, this.spriteService.getSpriteSheet(SpriteService.EXPLOSION)));
+        this.effects.push(new Effect(this.context, this.effects, this._currentXInPixels, this._currentYInPixels, SpriteService.EXPLOSION, this.world.spriteService));
     }
 
     control() {
         if (!this._transition.isOn && this._canMove) {
-            if (this.world.buttons[KeyCodes.UP]) {
+            if (this.buttons[KeyCodes.UP]) {
                 this.navigate(DIRECTION_UP);
             }
-            if (this.world.buttons[KeyCodes.RIGHT]) {
+            if (this.buttons[KeyCodes.RIGHT]) {
                 this.navigate(DIRECTION_RIGHT);
             }
-            if (this.world.buttons[KeyCodes.LEFT]) {
+            if (this.buttons[KeyCodes.LEFT]) {
                 this.navigate(DIRECTION_LEFT);
             }
-            if (this.world.buttons[KeyCodes.DOWN]) {
+            if (this.buttons[KeyCodes.DOWN]) {
                 this.navigate(DIRECTION_DOWN);
             }
         }
@@ -72,7 +79,15 @@ export class Character {
             let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
             let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
 
-            this._targetTile = this.world.infoClef(this._positionX + deltaX, this._positionY + deltaY);
+            if (this._positionX + deltaX > -1
+                && this._positionX + deltaX < this.board.size.width
+                && this._positionY + deltaY > -1
+                && this._positionY + deltaY < this.board.size.height) {
+                this._targetTile = this.keys[this.board.tiles[this._positionY + deltaY][this._positionX + deltaX]];
+            } else {
+                this._targetTile = false;
+            }
+
             if (!this._targetTile.collision) {
                 if (this._targetTile.action === "slide") {
                     this._transition.style = TRANSITION_STYLE_SLIDE;
@@ -141,8 +156,8 @@ export class Character {
                         break;
                     case "trap":
                         this.audioService.play(AudioService.MOVEMENT);
-                        this.world.effects.push(new Effect(this.world, this._positionX * this._tileSize, this._positionY * this._tileSize, this.spriteService.getSpriteSheet(SpriteService.DUST)));
-                        this.world.board.cells[this._positionY][this._positionX] = 7;
+                        this.effects.push(new Effect(this.context, this.effects, this._positionX * this._tileSize, this._positionY * this._tileSize, SpriteService.DUST, this.spriteService));
+                        this.board.tiles[this._positionY][this._positionX] = 7;
                         this._canMove = true;
                         break;
                     case "nextLevel":

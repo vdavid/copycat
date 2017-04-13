@@ -248,7 +248,7 @@ export class World {
         let blockRecherche = [];
         for (let j = 0; j < this.board.size.height; j++) {
             for (let i = 0; i < this.board.size.width; i++) {
-                let id = this.board.cells[j][i];
+                let id = this.board.tiles[j][i];
                 if (this.keys[id].name === keyToFind) {
                     let info = {
                         position: {
@@ -263,44 +263,36 @@ export class World {
         return blockRecherche;
     }
 
-    infoClef(x, y) {
-        if (x > -1 && x < this.board.size.width && y > -1 && y < this.board.size.height) {
-            return this.keys[this.board.cells[y][x]];
-        } else {
-            return false;
-        }
-    }
-
     bitMasking() {
         this.board.apparence = [];
         for (let y = 0; y < this.board.size.height; y++) {
             for (let x = 0; x < this.board.size.width; x++) {
-                let id = this.board.cells[y][x];
+                let id = this.board.tiles[y][x];
                 // up left right down
                 let neighbor = [0, 0, 0, 0];
                 if (y - 1 > -1) {
-                    if (id === this.board.cells[y - 1][x]) {
+                    if (id === this.board.tiles[y - 1][x]) {
                         neighbor[0] = 1; //up
                     }
                 } else {
                     neighbor[0] = 1;
                 }
                 if (x - 1 > -1) {
-                    if (id === this.board.cells[y][x - 1]) {
+                    if (id === this.board.tiles[y][x - 1]) {
                         neighbor[1] = 1; // left
                     }
                 } else {
                     neighbor[1] = 1;
                 }
                 if (x + 1 < this.board.size.width) {
-                    if (id === this.board.cells[y][x + 1]) {
+                    if (id === this.board.tiles[y][x + 1]) {
                         neighbor[2] = 1; // right
                     }
                 } else {
                     neighbor[2] = 1;
                 }
                 if (y + 1 < this.board.size.height) {
-                    if (id === this.board.cells[y + 1][x]) {
+                    if (id === this.board.tiles[y + 1][x]) {
                         neighbor[3] = 1; // down
                     }
                 } else {
@@ -324,7 +316,7 @@ export class World {
                 let spriteColumnIndex = 0;
                 let spriteRowIndex = 0;
                 let sprite = SpriteService.TILES;
-                let id = this.board.cells[j][i];
+                let id = this.board.tiles[j][i];
                 if (this.keys[id].apparence === "auto") {
                     spriteColumnIndex = Math.floor(this.board.apparence[j][i]);
                     spriteRowIndex = this.keys[id].rowIndex;
@@ -378,10 +370,10 @@ export class World {
     initializeMap() {
         this.board = {};
         this.isStopped = false;
-        this.board.cells = JSON.parse(JSON.stringify(this.levels[this.currentLevel].cells));
+        this.board.tiles = JSON.parse(JSON.stringify(this.levels[this.currentLevel].tiles));
         this.board.size = {
-            width: this.board.cells[0].length,
-            height: this.board.cells.length
+            width: this.board.tiles[0].length,
+            height: this.board.tiles.length
         };
         this.board.apparence = [];
         this.bitMasking();
