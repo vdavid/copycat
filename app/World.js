@@ -33,8 +33,12 @@ export class World {
         this.audioService = new AudioService(0.05);
         this.spriteService = new SpriteService();
         this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
-        this.spriteService.loadResources(() => { this.updateProgress(); });
-        this.audioService.loadResources(() => { this.updateProgress(); });
+        this.spriteService.loadResources(() => {
+            this.updateProgress();
+        });
+        this.audioService.loadResources(() => {
+            this.updateProgress();
+        });
 
         // levels
         this.levels = levels;
@@ -127,11 +131,13 @@ export class World {
                 name: "about",
                 link: "info"
             },];
-            this.menu = new Menu(this, this.width / 2, 110, menuItems);
+            this.menu = new Menu(this, this.context, this.width / 2, 110, menuItems);
             // End of initialization
             this.phase("menu");
             document.addEventListener("keydown", event => this.touchePresse(event), false);
-            document.addEventListener("keyup", event => this.toucheLache(event), false);
+            document.addEventListener("keyup", event => {
+                this.buttons[event.keyCode] = false;
+            }, false);
         } else {
             // Loading screen
             this.context.fillStyle = "#000";
@@ -163,7 +169,7 @@ export class World {
     touchePresse(event) {
         this.buttons[event.keyCode] = true;
         if (this.buttons[70]) {
-            this.activeRemplissage();
+            this.toggleFullscreen();
         }
         switch (this.state) {
             case "menu":
@@ -216,11 +222,7 @@ export class World {
         }
     }
 
-    toucheLache(event) {
-        this.buttons[event.keyCode] = false;
-    }
-
-    activeRemplissage() {
+    toggleFullscreen() {
         if (!this.remplissage) {
             //noinspection JSUnresolvedFunction
             this.canvas.webkitRequestFullScreen();
@@ -403,8 +405,12 @@ export class World {
         this.context.fillRect(0, 0, this.width, this.height);
         this.renderTerrain();
 
-        this.cats.forEach(cat => { cat.render(); });
-        this.effects.forEach(effect => { effect.render(); });
+        this.cats.forEach(cat => {
+            cat.render();
+        });
+        this.effects.forEach(effect => {
+            effect.render();
+        });
 
         /* Displays next frame */
         if (!this.isStopped) {
@@ -489,9 +495,6 @@ export class World {
 
                 this.context.drawImage(this.spriteService.getSpriteSheet(SpriteService.TITLE).image, 0, 0);
                 this.menu.render();
-                this.context.fillStyle = "#83769c";
-                this.context.fillRect(0, this.height - 35, this.width, 18);
-                this.spriteService.write(this.context, "arrow keys to select 'x' to confirm", this.width / 2, this.height - 30);
                 break;
             case "start":
                 this.intro();

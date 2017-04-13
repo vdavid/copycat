@@ -3,9 +3,9 @@ import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 
 export class Menu {
-    constructor(parent, centerX, centerY, menuItems) {
+    constructor(parent, context, centerX, centerY, menuItems) {
         this.parent = parent;
-        this.context = parent.context;
+        this.context = context;
         this.menuItems = menuItems;
         this.centerX = centerX;
         this.centerY = centerY;
@@ -34,12 +34,16 @@ export class Menu {
         let width = this.longestMenuItemName * 6 + 60;
         this.context.fillStyle = "#fff1e8";
         // Draws the frame
-        this.parent.spriteService.drawFrame(this.parent.context, this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length, "#fff1e8");
+        this.parent.spriteService.drawFrame(this.context, this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length, "#fff1e8");
         // Displays the title
         for (let i = 0; i < this.menuItems.length; i++) {
-            this.parent.spriteService.write(this.parent.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
+            this.parent.spriteService.write(this.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
         // on affiche la selection
         this.parent.spriteService.draw(SpriteService.ARROWS, this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
+
+        this.context.fillStyle = "#83769c";
+        this.context.fillRect(0, this.parent.height - 35, this.parent.width, 18);
+        this.parent.spriteService.write(this.context, "arrow keys to select 'x' to confirm", this.parent.width / 2, this.parent.height - 30);
     }
 }
