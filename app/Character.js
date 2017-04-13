@@ -27,7 +27,7 @@ export class Character {
         this.world = world;
         this.context = world.context;
         this.buttons = world.buttons;
-        this.board = world.board;
+        this.level = world.level;
         this.effects = world.effects;
         let tileSize = world.tileSize;
 
@@ -79,12 +79,12 @@ export class Character {
             let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
             let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
 
-            if (this._positionX + deltaX > -1
-                && this._positionX + deltaX < this.board.size.width
-                && this._positionY + deltaY > -1
-                && this._positionY + deltaY < this.board.size.height) {
-                this._isTargetTileAccessible = TileType.isAccessible(TileType.getNewIdByOldId(this.board.tiles[this._positionY + deltaY][this._positionX + deltaX]));
-                this._targetTileAction = TileType.getAction(TileType.getNewIdByOldId(this.board.tiles[this._positionY + deltaY][this._positionX + deltaX]));
+            if (this._positionX + deltaX >= 0
+                && this._positionX + deltaX < this.level.width
+                && this._positionY + deltaY >= 0
+                && this._positionY + deltaY < this.level.height) {
+                this._isTargetTileAccessible = TileType.isAccessible(this.level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
+                this._targetTileAction = TileType.getAction(this.level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
             } else {
                 this._isTargetTileAccessible = false;
                 this._targetTileAction = TileType.NO_ACTION;
@@ -159,7 +159,7 @@ export class Character {
                     case TileType.TRAP_ACTION:
                         this.audioService.play(AudioService.LANDSLIDE);
                         this.effects.push(new Effect(this.context, this.effects, this._positionX * this._tileSize, this._positionY * this._tileSize, SpriteService.DUST, this.spriteService));
-                        this.board.tiles[this._positionY][this._positionX] = 7;
+                        this.level.setTileType(this._positionX, this._positionY, TileType.HOLE);
                         this._canMove = true;
                         break;
                     case TileType.EXIT_ACTION:

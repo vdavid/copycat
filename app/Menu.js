@@ -23,25 +23,27 @@ export class Menu {
             this.parent.audioService.play(AudioService.SELECTION);
             this.selection += 1;
             this.render();
-        } else if (keyCode === KeyCodes.X) {
-            // select
+        } else if (keyCode === KeyCodes.X) { /* Select */
             this.parent.audioService.play(AudioService.VALIDATION);
             this.parent.phase(this.menuItems[this.selection].link);
         }
     }
 
     render() {
+        /* Calculates width */
         let width = this.longestMenuItemName * 6 + 60;
-        this.context.fillStyle = "#fff1e8";
-        // Draws the frame
+
+        /* Displays the frame */
         this.parent.spriteService.drawFrame(this.context, this.centerX - width / 2, this.centerY - 10, width, 26 * this.menuItems.length, "#fff1e8");
-        // Displays the title
+
+        /* Displays menu items */
         for (let i = 0; i < this.menuItems.length; i++) {
             this.parent.spriteService.write(this.context, this.menuItems[i].name, this.centerX, this.centerY + 25 * i);
         }
-        // on affiche la selection
+        /* Displays selector arrow */
         this.parent.spriteService.draw(SpriteService.ARROWS, this.context, this.centerX - width / 2 + 8, this.centerY + 25 * (this.selection) - 4, 3, 0);
 
+        /* Displays help text */
         this.context.fillStyle = "#83769c";
         this.context.fillRect(0, this.parent.height - 35, this.parent.width, 18);
         this.parent.spriteService.write(this.context, "arrow keys to select 'x' to confirm", this.parent.width / 2, this.parent.height - 30);

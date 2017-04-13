@@ -3,10 +3,11 @@ import {Character} from "./Character";
 import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 import {KeyCodes} from "./KeyCodes";
-import {TileType} from './TileType';
-import {TileRenderer} from './TileRenderer';
+import {TileRenderer} from "./TileRenderer";
+import {Level} from "./Level";
+import {TileType} from "./TileType";
 
-export class World {
+export class App {
     constructor(settings, levels) {
         // settings
         this.tileSize = settings.tileSize;
@@ -53,7 +54,7 @@ export class World {
         }
         // Recovers last save
         this.lastLevel = JSON.parse(localStorage['copycat']);
-        this.cats = [];
+        this.players = [];
         // Menu levels
         let self = this;
         this.menuLevels = {
@@ -130,7 +131,7 @@ export class World {
             this.menu = new Menu(this, this.context, this.width / 2, 110, menuItems);
             // End of initialization
             this.phase("menu");
-            document.addEventListener("keydown", event => this.touchePresse(event), false);
+            document.addEventListener("keydown", event => this.handleKeyDown(event.keyCode), false);
             document.addEventListener("keyup", event => {
                 this.buttons[event.keyCode] = false;
             }, false);
@@ -144,59 +145,33 @@ export class World {
     }
 
     /* Events */
-    touchePresse(event) {
-        this.buttons[event.keyCode] = true;
+    handleKeyDown(keyCode) {
+        this.buttons[keyCode] = true;
         if (this.buttons[KeyCodes.F]) {
             this.toggleFullscreen();
-        }
-        switch (this.state) {
-            case "menu":
-                this.menu.change(event.keyCode);
-                break;
-            case "start":
-                if (this.buttons[KeyCodes.E] && this.animation) {
-                    this.audioService.play(AudioService.VALIDATION);
-                    this.phase("menu")
-                }
-                if (this.buttons[KeyCodes.R] && this.animation) {
-                    this.audioService.play(AudioService.VALIDATION);
-                    cancelAnimationFrame(this.animation);
-                    this.animation = null;
-                    this.isStopped = true;
-                    this.outro();
-                }
-                break;
-            case "fin":
-                if (this.buttons[KeyCodes.C]) {
-                    this.audioService.play(AudioService.VALIDATION);
-                    this.phase("menu")
-                }
-                break;
-            case "rules":
-                if (this.buttons[KeyCodes.C]) {
-                    this.audioService.play(AudioService.VALIDATION);
-                    this.phase("menu")
-                }
-                break;
-            case "info":
-                if (this.buttons[KeyCodes.C]) {
-                    this.audioService.play(AudioService.VALIDATION);
-                    this.phase("menu")
-                }
-                break;
-            case "levels":
-                this.menuLevels.change(event.keyCode);
-                if (this.buttons[KeyCodes.C]) {
-                    this.audioService.play(AudioService.VALIDATION);
-                    this.phase("menu")
-                }
-                if (this.buttons[KeyCodes.X]) {
-                    this.currentLevel = this.menuLevels.selection;
-                    this.phase("start")
-                }
-                break;
-            default:
-                console.log("aucune touche reconnue");
+        } else if (this.buttons[KeyCodes.C] && (['fin', 'rules', 'info', 'levels'].indexOf(this.state) >= 0)) {
+            this.audioService.play(AudioService.VALIDATION);
+            this.phase("menu")
+        } else if (this.state === 'menu') {
+            this.menu.change(keyCode);
+        } else if (this.state === 'levels') {
+            this.menuLevels.change(keyCode);
+            if (this.buttons[KeyCodes.X]) {
+                this.currentLevel = this.menuLevels.selection;
+                this.phase("start")
+            }
+        } else if (this.state === 'start') {
+            if (this.buttons[KeyCodes.E] && this.animation) {
+                this.audioService.play(AudioService.VALIDATION);
+                this.phase("menu")
+            }
+            if (this.buttons[KeyCodes.R] && this.animation) {
+                this.audioService.play(AudioService.VALIDATION);
+                cancelAnimationFrame(this.animation);
+                this.animation = null;
+                this.isStopped = true;
+                this.outro();
+            }
         }
     }
 
@@ -216,79 +191,8 @@ export class World {
         }
     }
 
-    /*
-     ______               _   _
-     |  ____|             | | (_)
-     | |__ ___  _ __   ___| |_ _  ___  _ __  ___
-     |  __/ _ \| '_ \ / __| __| |/ _ \| '_ \/ __|
-     | | | (_) | | | | (__| |_| | (_) | | | \__ \
-     |_|  \___/|_| |_|\___|\__|_|\___/|_| |_|___/
-
-     */
-    /**
-     * @returns {Object[]}
-     */
-    findPlayers() {
-        let playerPositions = [];
-        for (let j = 0; j < this.board.size.height; j++) {
-            for (let i = 0; i < this.board.size.width; i++) {
-                if (TileType.getNewIdByOldId(this.board.tiles[j][i]) === TileType.PLAYER) {
-                    playerPositions.push({x: i, y: j});
-                }
-            }
-        }
-        return playerPositions;
-    }
-
-    bitMasking() {
-        this.board.apparence = [];
-        for (let y = 0; y < this.board.size.height; y++) {
-            for (let x = 0; x < this.board.size.width; x++) {
-                let id = this.board.tiles[y][x];
-                // up left right down
-                let neighbor = [0, 0, 0, 0];
-                if (y - 1 > -1) {
-                    if (id === this.board.tiles[y - 1][x]) {
-                        neighbor[0] = 1; //up
-                    }
-                } else {
-                    neighbor[0] = 1;
-                }
-                if (x - 1 > -1) {
-                    if (id === this.board.tiles[y][x - 1]) {
-                        neighbor[1] = 1; // left
-                    }
-                } else {
-                    neighbor[1] = 1;
-                }
-                if (x + 1 < this.board.size.width) {
-                    if (id === this.board.tiles[y][x + 1]) {
-                        neighbor[2] = 1; // right
-                    }
-                } else {
-                    neighbor[2] = 1;
-                }
-                if (y + 1 < this.board.size.height) {
-                    if (id === this.board.tiles[y + 1][x]) {
-                        neighbor[3] = 1; // down
-                    }
-                } else {
-                    neighbor[3] = 1;
-                }
-                //noinspection PointlessArithmeticExpressionJS
-                id = 1 * neighbor[0] + 2 * neighbor[1] + 4 * neighbor[2] + 8 * neighbor[3];
-                this.board.apparence.push(id);
-            }
-        }
-        let temp = [];
-        for (let i = 0; i < this.board.apparence.length; i += this.board.size.width) {
-            temp.push(this.board.apparence.slice(i, i + this.board.size.width))
-        }
-        this.board.apparence = temp;
-    }
-
     renderTerrain() {
-        this.tileRenderer.renderTerrain(this.board);
+        this.tileRenderer.renderMap(this.level);
 
         if (this.levels[this.currentLevel].comment) {
             this.spriteService.drawFrame(this.context, 0, this.height - 32, this.width, 32, "#fff1e8");
@@ -308,15 +212,8 @@ export class World {
      |__/
      */
     initializeMap() {
-        this.board = {};
         this.isStopped = false;
-        this.board.tiles = JSON.parse(JSON.stringify(this.levels[this.currentLevel].tiles));
-        this.board.size = {
-            width: this.board.tiles[0].length,
-            height: this.board.tiles.length
-        };
-        this.board.apparence = [];
-        this.bitMasking();
+        this.level = new Level(this.levels[this.currentLevel].name, this.levels[this.currentLevel].tiles, this.levels[this.currentLevel].comment);
     }
 
     animate() {
@@ -324,16 +221,20 @@ export class World {
         this.context.fillStyle = "black";
         this.context.fillRect(0, 0, this.width, this.height);
 
+        /* Renders game screen */
         this.renderTerrain();
 
-        this.cats.forEach(player => {
+        /* Renders player(s) */
+        this.players.forEach(player => {
             player.render();
         });
+
+        /* Renders effects */
         this.effects.forEach(effect => {
             effect.render();
         });
 
-        /* Displays next frame */
+        /* Queues next frame until stopped */
         if (!this.isStopped) {
             this.animation = requestAnimationFrame(() => this.animate());
         }
@@ -394,10 +295,10 @@ export class World {
                 requestAnimationFrame(animate);
             } else {
                 world.effects = [];
-                world.cats = [];
-                let positions = world.findPlayers();
-                for (let i = 0; i < positions.length; i++) {
-                    world.cats.push(new Character(world, positions[i].x, positions[i].y, SpriteService.PLAYER,
+                world.players = [];
+                let playerStartPositions = world.level.findAllTilesOfType(TileType.PLAYER);
+                for (let i = 0; i < playerStartPositions.length; i++) {
+                    world.players.push(new Character(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
                         world.spriteService, world.audioService));
                 }
 
@@ -468,7 +369,9 @@ export class World {
     }
 
     checkLevelCompletion() {
-        if (this.cats.every(player => { return player.reachedAnExit; })) {
+        if (this.players.every(player => {
+                return player.reachedAnExit;
+            })) {
             this.currentLevel += 1;
             if (this.lastLevel < this.currentLevel) {
                 this.lastLevel = this.currentLevel;

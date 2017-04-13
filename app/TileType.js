@@ -1,8 +1,4 @@
 export class TileType {
-    static getNewIdByOldId(oldId) {
-        return tileTypeOldToNewIdMap[oldId];
-    }
-
     static isAccessible(tileTypeId) {
         return tileTypes[tileTypeId].isAccessible;
     }
@@ -10,8 +6,6 @@ export class TileType {
     static getAction(tileTypeId) {
         return tileTypes[tileTypeId].action;
     }
-
-
 }
 
 TileType.NO_ACTION = Symbol('NO_ACTION');
@@ -36,22 +30,6 @@ TileType.LEFT_ARROW = 'LEFT_ARROW';
 TileType.UP_ARROW = 'UP_ARROW';
 TileType.RIGHT_ARROW = 'RIGHT_ARROW';
 TileType.DOWN_ARROW = 'DOWN_ARROW';
-
-const tileTypeOldToNewIdMap = {
-    0: TileType.WATER,
-    1: TileType.GRASS,
-    2: TileType.WALL,
-    3: TileType.ICE,
-    4: TileType.EXIT,
-    5: TileType.PLAYER,
-    6: TileType.TRAP,
-    7: TileType.HOLE,
-    8: TileType.FENCE,
-    9: TileType.LEFT_ARROW,
-    10: TileType.UP_ARROW,
-    11: TileType.RIGHT_ARROW,
-    12: TileType.DOWN_ARROW
-};
 
 const tileTypes = {
     [TileType.WATER]: {isAccessible: false, action: TileType.NO_ACTION},

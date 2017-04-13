@@ -1,12 +1,13 @@
-import {World} from "./World";
+import {App} from "./App";
 import {levels} from "./data/levels";
+import {KeyCodes} from "./KeyCodes";
 //noinspection ES6UnusedImports,JSUnresolvedVariable
 import css from "./copycat.css";
 
 /* Utilities */
 window.addEventListener("keydown", function (e) {
     // space and arrow keys
-    if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+    if ([KeyCodes.SPACE, KeyCodes.LEFT, KeyCodes.UP, KeyCodes.RIGHT, KeyCodes.DOWN].indexOf(e.keyCode) > -1) {
         e.preventDefault();
     }
 }, false);
@@ -27,4 +28,4 @@ let settings = {
     zoom: 2,
 };
 
-new World(settings, levels);
+new App(settings, levels);

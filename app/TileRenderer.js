@@ -14,16 +14,16 @@ export class TileRenderer {
 
         /* Initializes animations */
         this._animatedTileTypeStates = {};
-        for(let tileTypeId of Object.keys(animatedTiles)) {
-            this._animatedTileTypeStates[tileTypeId] = {frame: 0, spriteId: animatedTiles[tileTypeId].spriteId, isTileTypeAnimatedInThisFrame: false, canAnimate: true };
+        for (let tileTypeId of Object.keys(animatedTiles)) {
+            this._animatedTileTypeStates[tileTypeId] = {frame: 0, spriteId: animatedTiles[tileTypeId].spriteId, isTileTypeAnimatedInThisFrame: false, canAnimate: true};
         }
     }
 
-    renderTerrain(board) {
-        for (let j = 0; j < board.tiles.length; j++) {
-            for (let i = 0; i < board.tiles[j].length; i++) {
+    renderMap(level) {
+        for (let y = 0; y < level.height; y++) {
+            for (let x = 0; x < level.width; x++) {
                 let spriteColumnIndex = 0;
-                let tileTypeId = TileType.getNewIdByOldId(board.tiles[j][i]);
+                let tileTypeId = level.getTileType(x, y);
                 let spriteId = SpriteService.TILES;
                 let spriteRowIndex;
                 if (isAnimated(tileTypeId)) {
@@ -42,14 +42,14 @@ export class TileRenderer {
 
                 } else {
                     spriteColumnIndex = (getColumnIndex(tileTypeId) === "auto")
-                        ? Math.floor(board.apparence[j][i])
+                        ? Math.floor(level.getSpriteIndex(x, y))
                         : getColumnIndex(tileTypeId);
                     spriteRowIndex = getRowIndex(tileTypeId);
                 }
-                this._spriteService.draw(spriteId, this._context, i * this._tileSizeInPixels, j * this._tileSizeInPixels, spriteColumnIndex, spriteRowIndex);
+                this._spriteService.draw(spriteId, this._context, x * this._tileSizeInPixels, y * this._tileSizeInPixels, spriteColumnIndex, spriteRowIndex);
             }
         }
-        for(let tileTypeId of Object.keys(animatedTiles)) {
+        for (let tileTypeId of Object.keys(animatedTiles)) {
             this._animatedTileTypeStates[tileTypeId].isTileTypeAnimatedInThisFrame = false;
         }
     }
