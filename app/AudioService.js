@@ -14,7 +14,7 @@ export class AudioService {
         for (let i = 0; i < audioResources.length; i++) {
             this._loadAudio(audioResources[i].url, this.masterVolume)
                 .then(audio => {
-                    this.audios[audioResources[i].name] = audio;
+                    this.audios[audioResources[i].audioId] = audio;
                     progressCallback();
                 })
                 .catch(error => {
@@ -39,8 +39,8 @@ export class AudioService {
         return audioResources.length;
     }
 
-    play(id) {
-        this.audios[id].play()
+    play(audioId) {
+        this.audios[audioId].play()
     }
 }
 
@@ -52,10 +52,10 @@ AudioService.APPEARANCE = Symbol('APPEARANCE');
 AudioService.LANDSLIDE = Symbol('LANDSLIDE');
 
 const audioResources = [
-    {name: AudioService.MOVEMENT, url: "./resources/sounds/NFF-select-04.mp3"},
-    {name: AudioService.SELECTION, url: "./resources/sounds/NFF-select.mp3"},
-    {name: AudioService.SUCCESS, url: "./resources/sounds/NFF-bravo.mp3"},
-    {name: AudioService.VALIDATION, url: "./resources/sounds/NFF-click-switch.mp3"},
-    {name: AudioService.APPEARANCE, url: "./resources/sounds/NFF-bubble-input.mp3"},
-    {name: AudioService.LANDSLIDE, url: "./resources/sounds/NFF-moving-block.mp3"},
+    {audioId: AudioService.MOVEMENT, url: "./resources/sounds/NFF-select-04.mp3"},
+    {audioId: AudioService.SELECTION, url: "./resources/sounds/NFF-select.mp3"},
+    {audioId: AudioService.SUCCESS, url: "./resources/sounds/NFF-bravo.mp3"},
+    {audioId: AudioService.VALIDATION, url: "./resources/sounds/NFF-click-switch.mp3"},
+    {audioId: AudioService.APPEARANCE, url: "./resources/sounds/NFF-bubble-input.mp3"},
+    {audioId: AudioService.LANDSLIDE, url: "./resources/sounds/NFF-moving-block.mp3"},
 ];
