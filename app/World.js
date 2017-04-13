@@ -4,6 +4,7 @@ import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 import {KeyCodes} from "./KeyCodes";
 import {TileType} from './TileType';
+import {TileRenderer} from './TileRenderer';
 
 export class World {
     constructor(settings, levels) {
@@ -311,32 +312,30 @@ export class World {
             for (let i = 0; i < this.board.size.width; i++) {
                 let spriteColumnIndex = 0;
                 let oldId = this.board.tiles[j][i];
-                let newId = TileType.getNewIdByOldId(oldId);
-                let tileTypeId = TileType.getNewIdByOldId(oldId);
-                let spriteRowIndex = TileType.getRowIndex(tileTypeId);
+                let tileTypeId = TileType.getNewIdByOldId(this.board.tiles[j][i]);
                 let spriteId = SpriteService.TILES;
-                if (TileType.getTile(newId) === "auto") {
-                    spriteColumnIndex = Math.floor(this.board.apparence[j][i]);
-                } else if (TileType.isAnimated(newId)) {
+                let spriteRowIndex;
+                if (TileRenderer.isAnimated(tileTypeId)) {
                     if (!this.keys[oldId].memoireBoucle) {
                         if (this.keys[oldId].canAnimate) {
-                            this.keys[oldId].frame += this.keys[oldId].allure;
+                            this.keys[oldId].frame += TileRenderer.getSpeedOfAnimatedTile(tileTypeId);
                         }
                         if (this.keys[oldId].frame >= this.keys[oldId].spriteSheet.columnCount) {
-                            if (!TileType.isAnimated(tileTypeId)) {
-                                this.keys[oldId].canAnimate = false;
-                            }
                             this.keys[oldId].frame = 0;
                         }
                         this.keys[oldId].memoireBoucle = true;
                         // on sait quel id est déjà passé :^)
                         this.nettoyer[oldId] = true;
                     }
-                    spriteId = TileType.getTile(newId);
+                    spriteId = TileRenderer.getSpriteIdOfAnimatedTile(tileTypeId);
                     spriteColumnIndex = Math.floor(this.keys[oldId].frame);
+                    spriteRowIndex = 0;
 
                 } else {
-                    spriteColumnIndex = TileType.getTile(newId);
+                    spriteColumnIndex = (TileRenderer.getColumnIndex(tileTypeId) === "auto")
+                        ? Math.floor(this.board.apparence[j][i])
+                        : TileRenderer.getColumnIndex(tileTypeId);
+                    spriteRowIndex = TileRenderer.getRowIndex(tileTypeId);
                 }
                 this.spriteService.draw(spriteId, this.context, i * this.tileSize, j * this.tileSize, spriteColumnIndex, spriteRowIndex);
             }

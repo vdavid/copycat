@@ -1,5 +1,3 @@
-import {SpriteService} from "./SpriteService";
-
 export class TileType {
     static getTileTypeCount() {
         return Object.keys(tileTypes).length;
@@ -7,14 +5,6 @@ export class TileType {
 
     static getNewIdByOldId(oldId) {
         return tileTypeOldToNewIdMap[oldId];
-    }
-
-    static isAnimated(tileTypeId) {
-        return tileTypes[tileTypeId].isAnimated;
-    }
-
-    static getRowIndex(tileTypeId) {
-        return tileTypes[tileTypeId].rowIndex;
     }
 
     static isAccessible(tileTypeId) {
@@ -25,13 +15,7 @@ export class TileType {
         return tileTypes[tileTypeId].action;
     }
 
-    // static getSpeedOfAnimatedTile(tileTypeId) {
-    //     return tileTypes[tileTypeId].speed;
-    // }
 
-    static getTile(tileTypeId) {
-        return tileTypes[tileTypeId].tile;
-    }
 }
 
 TileType.NO_ACTION = Symbol('NO_ACTION');
@@ -74,17 +58,17 @@ const tileTypeOldToNewIdMap = {
 };
 
 const tileTypes = {
-    [TileType.WATER]: {id: 0, isAccessible: false, isAnimated: false, tile: "auto", action: TileType.NO_ACTION, rowIndex: 3},
-    [TileType.GRASS]: {id: 1, isAccessible: true, isAnimated: false, tile: 1, action: TileType.NO_ACTION, rowIndex: 0},
-    [TileType.WALL]: {id: 2, isAccessible: false, isAnimated: false, tile: "auto", action: TileType.NO_ACTION, rowIndex: 1},
-    [TileType.ICE]: {id: 3, isAccessible: true, isAnimated: false, tile: "auto", action: TileType.SLIDE_ACTION, rowIndex: 2},
-    [TileType.EXIT]: {id: 4, isAccessible: true, isAnimated: true, tile: SpriteService.EXIT, speed: 0.3, action: TileType.EXIT_ACTION, rowIndex: 0},
-    [TileType.PLAYER]: {id: 5, isAccessible: true, isAnimated: false, tile: 5, action: TileType.NO_ACTION, rowIndex: 0},
-    [TileType.TRAP]: {id: 6, isAccessible: true, isAnimated: false, tile: 6, action: TileType.TRAP_ACTION, rowIndex: 0},
-    [TileType.HOLE]: {id: 7, isAccessible: false, isAnimated: false, tile: 7, action: TileType.NO_ACTION, rowIndex: 0},
-    [TileType.FENCE]: {id: 8, isAccessible: false, isAnimated: false, tile: "auto", action: TileType.NO_ACTION, rowIndex: 4},
-    [TileType.LEFT_ARROW]: {id: 9, isAccessible: true, isAnimated: false, tile: 9, action: TileType.LEFT_ACTION, rowIndex: 0},
-    [TileType.UP_ARROW]: {id: 10, isAccessible: true, isAnimated: false, tile: 10, action: TileType.UP_ACTION, rowIndex: 0},
-    [TileType.RIGHT_ARROW]: {id: 11, isAccessible: true, isAnimated: false, tile: 11, action: TileType.RIGHT_ACTION, rowIndex: 0},
-    [TileType.DOWN_ARROW]: {id: 12, isAccessible: true, isAnimated: false, tile: 12, action: TileType.DOWN_ACTION, rowIndex: 0}
+    [TileType.WATER]: {isAccessible: false, action: TileType.NO_ACTION},
+    [TileType.GRASS]: {isAccessible: true, action: TileType.NO_ACTION},
+    [TileType.WALL]: {isAccessible: false, action: TileType.NO_ACTION},
+    [TileType.ICE]: {isAccessible: true, action: TileType.SLIDE_ACTION},
+    [TileType.EXIT]: {isAccessible: true, action: TileType.EXIT_ACTION},
+    [TileType.PLAYER]: {isAccessible: true, action: TileType.NO_ACTION},
+    [TileType.TRAP]: {isAccessible: true, action: TileType.TRAP_ACTION},
+    [TileType.HOLE]: {isAccessible: false, action: TileType.NO_ACTION},
+    [TileType.FENCE]: {isAccessible: false, action: TileType.NO_ACTION},
+    [TileType.LEFT_ARROW]: {isAccessible: true, action: TileType.LEFT_ACTION},
+    [TileType.UP_ARROW]: {isAccessible: true, action: TileType.UP_ACTION},
+    [TileType.RIGHT_ARROW]: {isAccessible: true, action: TileType.RIGHT_ACTION},
+    [TileType.DOWN_ARROW]: {isAccessible: true, action: TileType.DOWN_ACTION}
 };
