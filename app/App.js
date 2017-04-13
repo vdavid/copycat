@@ -1,5 +1,5 @@
 import {Menu} from "./Menu";
-import {Character} from "./Character";
+import {Player} from "./Player";
 import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 import {KeyCodes} from "./KeyCodes";
@@ -228,6 +228,8 @@ export class App {
         /* Renders player(s) */
         this.players.forEach(player => {
             player.render();
+            player.transition();
+            player.control();
         });
 
         /* Renders effects */
@@ -264,7 +266,7 @@ export class App {
                 world.players = [];
                 let playerStartPositions = world.level.findAllTilesOfType(TileType.START);
                 for (let i = 0; i < playerStartPositions.length; i++) {
-                    world.players.push(new Character(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
+                    world.players.push(new Player(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
                         world.tileRenderer.tileSizeInPixels, world.spriteService, world.audioService));
                 }
 
@@ -370,7 +372,7 @@ export class App {
 
     checkLevelCompletion() {
         if (this.players.every(player => {
-                return player._hasReachedAnExit;
+                return player.hasReachedAnExit;
             })) {
             this.currentLevel += 1;
             if (this.lastLevel < this.currentLevel) {
