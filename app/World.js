@@ -154,11 +154,11 @@ export class World {
                 this.menu.change(event.keyCode);
                 break;
             case "start":
-                if (this.buttons[69] && this.animation) {
+                if (this.buttons[KeyCodes.E] && this.animation) {
                     this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
-                if (this.buttons[82] && this.animation) {
+                if (this.buttons[KeyCodes.R] && this.animation) {
                     this.audioService.play(AudioService.VALIDATION);
                     cancelAnimationFrame(this.animation);
                     this.animation = null;
@@ -167,30 +167,30 @@ export class World {
                 }
                 break;
             case "fin":
-                if (this.buttons[67]) {
+                if (this.buttons[KeyCodes.C]) {
                     this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 break;
             case "rules":
-                if (this.buttons[67]) {
+                if (this.buttons[KeyCodes.C]) {
                     this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 break;
             case "info":
-                if (this.buttons[67]) {
+                if (this.buttons[KeyCodes.C]) {
                     this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
                 break;
             case "levels":
                 this.menuLevels.change(event.keyCode);
-                if (this.buttons[67]) {
+                if (this.buttons[KeyCodes.C]) {
                     this.audioService.play(AudioService.VALIDATION);
                     this.phase("menu")
                 }
-                if (this.buttons[88]) {
+                if (this.buttons[KeyCodes.X]) {
                     this.currentLevel = this.menuLevels.selection;
                     this.phase("start")
                 }
@@ -468,7 +468,7 @@ export class World {
     }
 
     checkLevelCompletion() {
-        if (this.cats.every(cat => { return cat.reachedAnExit; })) {
+        if (this.cats.every(player => { return player.reachedAnExit; })) {
             this.currentLevel += 1;
             if (this.lastLevel < this.currentLevel) {
                 this.lastLevel = this.currentLevel;
