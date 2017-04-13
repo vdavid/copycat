@@ -1,24 +1,28 @@
 export class Sprite {
-    constructor(world, positionX, positionY, spriteSheet) {
-        this.context = world.context;
-        this.spriteSheet = spriteSheet;
-        this.tileSize = world.tileSize;
-        this.width = Math.round(this.spriteSheet.image.width / this.spriteSheet.columnCount);
-        this.height = this.spriteSheet.image.height / this.spriteSheet.rowCount;
-        this.position = {
-            x: positionX * this.tileSize,
-            y: positionY * this.tileSize
-        };
-        this.length = this.spriteSheet.columnCount;
+    /**
+     *
+     * @param {CanvasRenderingContext2D} context
+     * @param {Number} tileSize
+     * @param {Number} positionX
+     * @param {Number} positionY
+     * @param {Symbol} spriteId
+     * @param {SpriteService} spriteService
+     */
+    constructor(context, tileSize, positionX, positionY, spriteId, spriteService) {
+        this.context = context;
+        this.spriteId = spriteId;
+        this.spriteService = spriteService;
+        this.positionXInPixels = positionX * tileSize;
+        this.positionYInPixels = positionY * tileSize;
+        this.length = this.spriteService.getSpriteSheet(spriteId).columnCount;
         this.frame = 0;
-        this.tileSize = world.tileSize;
         this.selectLigne = 0;
         this.animation = true;
         this.allure = 0.2;
     }
 
     draw() {
-        this.context.drawImage(this.spriteSheet.image, Math.floor(this.frame) * this.width, this.selectLigne, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+        this.spriteService.draw(this.spriteId, this.context, this.positionXInPixels, this.positionYInPixels, Math.floor(this.frame), 0);
     }
 
     animate() {

@@ -14,7 +14,7 @@ export class World {
         this.state = "menu";
         this.keys = settings.keys;
         // Frames per second
-        this.fps = 60;
+        //this.fps = 60;
 
         this.canvas = document.createElement("canvas");
         this.context = this.canvas.getContext('2d');
@@ -392,7 +392,7 @@ export class World {
         this.cats = [];
         let posCat = this.findKey("player");
         for (let i = 0; i < posCat.length; i++) {
-            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet(SpriteService.PLAYER),
+            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, SpriteService.PLAYER,
                 this.spriteService, this.audioService));
         }
     }

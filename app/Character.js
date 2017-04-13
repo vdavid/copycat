@@ -9,38 +9,37 @@ const DIRECTION_DOWN = Symbol('DIRECTION_DOWN');
 const DIRECTION_LEFT = Symbol('DIRECTION_LEFT');
 const DIRECTION_RIGHT = Symbol('DIRECTION_RIGHT');
 
+const TRANSITION_STYLE_WALK = Symbol('TRANSITION_STYLE_WALK');
+const TRANSITION_STYLE_SLIDE = Symbol('TRANSITION_STYLE_SLIDE');
+
 export class Character {
     /**
      *
      * @param world
      * @param x
      * @param y
-     * @param spriteSheet
+     * @param {Symbol} spriteId
      * @param {SpriteService} spriteService
      * @param {AudioService} audioService
      */
-    constructor(world, x, y, spriteSheet, spriteService, audioService) {
+    constructor(world, x, y, spriteId, spriteService, audioService) {
         this.world = world;
         this.spriteService = spriteService;
         this.audioService = audioService;
-        this._position = {
-            x: x,
-            y: y
-        };
+        this._positionX = x;
+        this._positionY = y;
+        
         this._tileSize = world.tileSize;
-        this._target = {
-            x: this._position.x * this._tileSize,
-            y: this._position.y * this._tileSize,
-        };
-        this._currentLocation = {
-            x: this._position.x * this._tileSize,
-            y: this._position.y * this._tileSize,
-        };
-        this.spriteSheet = new Sprite(this.world, this._position.x, this._position.y, spriteSheet);
+        this._currentXInPixels = this._positionX * this._tileSize;
+        this._currentYInPixels = this._positionY * this._tileSize;
+        this._targetXInPixels = this._currentXInPixels;
+        this._targetYInPixels = this._currentYInPixels;
+
+        this.sprite = new Sprite(this.world.context, this.world.tileSize, this._positionX, this._positionY, spriteId, spriteService);
         this._transition = {
-            state: false,
+            isOn: false,
             time: null,
-            duration: 200,
+            durationInMilliseconds: 200,
             style: "walk"
         };
         this.lastDirection = "none";
@@ -48,11 +47,11 @@ export class Character {
         this._collision = false;
         this.reachedAnExit = false;
         this.audioService.play(AudioService.APPEARANCE);
-        this.world.effects.push(new Effect(this.world, this._currentLocation.x, this._currentLocation.y, this.spriteService.getSpriteSheet(SpriteService.EXPLOSION)));
+        this.world.effects.push(new Effect(this.world, this._currentXInPixels, this._currentYInPixels, this.spriteService.getSpriteSheet(SpriteService.EXPLOSION)));
     }
 
     control() {
-        if (!this._transition.state && this._canMove) {
+        if (!this._transition.isOn && this._canMove) {
             if (this.world.buttons[KeyCodes.UP]) {
                 this.navigate(DIRECTION_UP);
             }
@@ -69,28 +68,28 @@ export class Character {
     }
 
     navigate(direction) {
-        if (!this._transition.state) {
+        if (!this._transition.isOn) {
             let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
             let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
 
-            this._targetTile = this.world.infoClef(this._position.x + deltaX, this._position.y + deltaY);
+            this._targetTile = this.world.infoClef(this._positionX + deltaX, this._positionY + deltaY);
             if (!this._targetTile.collision) {
                 if (this._targetTile.action === "slide") {
-                    this._transition.style = "slide";
-                    this._transition.duration = 80;
+                    this._transition.style = TRANSITION_STYLE_SLIDE;
+                    this._transition.durationInMilliseconds = 80;
                 } else {
-                    this._transition.style = "walk";
-                    this._transition.duration = 200;
+                    this._transition.style = TRANSITION_STYLE_WALK;
+                    this._transition.durationInMilliseconds = 200;
                 }
                 this._collision = false;
                 this.reachedAnExit = false;
-                this._transition.state = true;
+                this._transition.isOn = true;
                 this.lastDirection = direction;
-                this._transition.time = new Date();
-                this._position.x += deltaX;
-                this._position.y += deltaY;
-                this._target.x = this._position.x * this._tileSize;
-                this._target.y = this._position.y * this._tileSize;
+                this._transition.startDateTime = new Date();
+                this._positionX += deltaX;
+                this._positionY += deltaY;
+                this._targetXInPixels = this._positionX * this._tileSize;
+                this._targetYInPixels = this._positionY * this._tileSize;
             } else {
                 this._collision = true;
             }
@@ -98,22 +97,22 @@ export class Character {
     }
 
     translation() {
-        if (this._transition.state) {
-            let time = new Date() - this._transition.time;
-            if (time < this._transition.duration) {
-                if (this._transition.style === "walk") {
-                    this.spriteSheet.position.x = Math.easeInOutQuart(time, this._currentLocation.x, this._target.x - this._currentLocation.x, this._transition.duration);
-                    this.spriteSheet.position.y = Math.easeInOutQuart(time, this._currentLocation.y, this._target.y - this._currentLocation.y, this._transition.duration);
+        if (this._transition.isOn) {
+            let elapsedTime = new Date() - this._transition.startDateTime;
+            if (elapsedTime < this._transition.durationInMilliseconds) {
+                if (this._transition.style === TRANSITION_STYLE_WALK) {
+                    this.sprite.positionXInPixels = Math.easeInOutQuart(elapsedTime, this._currentXInPixels, this._targetXInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
+                    this.sprite.positionYInPixels = Math.easeInOutQuart(elapsedTime, this._currentYInPixels, this._targetYInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
                 } else {
-                    this.spriteSheet.position.x = Math.linearTween(time, this._currentLocation.x, this._target.x - this._currentLocation.x, this._transition.duration);
-                    this.spriteSheet.position.y = Math.linearTween(time, this._currentLocation.y, this._target.y - this._currentLocation.y, this._transition.duration);
+                    this.sprite.positionXInPixels = Math.linearTween(elapsedTime, this._currentXInPixels, this._targetXInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
+                    this.sprite.positionYInPixels = Math.linearTween(elapsedTime, this._currentYInPixels, this._targetYInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
                 }
             } else {
-                this._transition.state = false;
-                this.spriteSheet.position.x = this._target.x;
-                this.spriteSheet.position.y = this._target.y;
-                this._currentLocation.x = this._target.x;
-                this._currentLocation.y = this._target.y;
+                this._transition.isOn = false;
+                this.sprite.positionXInPixels = this._targetXInPixels;
+                this.sprite.positionYInPixels = this._targetYInPixels;
+                this._currentXInPixels = this._targetXInPixels;
+                this._currentYInPixels = this._targetYInPixels;
                 // Does different stuff depending on target tile type
                 switch (this._targetTile.action) {
                     case "slide":
@@ -142,8 +141,8 @@ export class Character {
                         break;
                     case "trap":
                         this.audioService.play(AudioService.MOVEMENT);
-                        this.world.effects.push(new Effect(this.world, this._position.x * this._tileSize, this._position.y * this._tileSize, this.spriteService.getSpriteSheet(SpriteService.DUST)));
-                        this.world.board.cells[this._position.y][this._position.x] = 7;
+                        this.world.effects.push(new Effect(this.world, this._positionX * this._tileSize, this._positionY * this._tileSize, this.spriteService.getSpriteSheet(SpriteService.DUST)));
+                        this.world.board.cells[this._positionY][this._positionX] = 7;
                         this._canMove = true;
                         break;
                     case "nextLevel":
@@ -162,7 +161,7 @@ export class Character {
     }
 
     render() {
-        this.spriteSheet.render();
+        this.sprite.render();
         this.translation();
         this.control();
     }

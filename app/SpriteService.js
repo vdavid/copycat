@@ -60,12 +60,12 @@ export class SpriteService {
         this.drawStretched(SpriteService.FRAME, context, x + width - spriteWidth, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 2, 1);
     }
 
-    draw(sprite, context, x, y, columnIndex, rowIndex) {
-        draw(this._sheets[sprite], context, x, y, undefined, undefined, columnIndex, rowIndex)
+    draw(spriteId, context, x, y, columnIndex, rowIndex) {
+        draw(this._sheets[spriteId], context, x, y, undefined, undefined, columnIndex, rowIndex)
     }
 
-    drawStretched(sprite, context, x, y, width, height, columnIndex, rowIndex) {
-        draw(this._sheets[sprite], context, x, y, width, height, columnIndex, rowIndex)
+    drawStretched(spriteId, context, x, y, width, height, columnIndex, rowIndex) {
+        draw(this._sheets[spriteId], context, x, y, width, height, columnIndex, rowIndex)
     }
 
     getSpriteSheet(name) {
