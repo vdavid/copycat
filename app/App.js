@@ -57,7 +57,7 @@ export class App {
         this.players = [];
         // Menu levels
         let self = this;
-        this.menuLevels = {
+        this.levelsMenu = {
             world: self,
             context: self.context,
             count: self.levels.length,
@@ -155,9 +155,9 @@ export class App {
         } else if (this.state === 'menu') {
             this.menu.change(keyCode);
         } else if (this.state === 'levels') {
-            this.menuLevels.change(keyCode);
+            this.levelsMenu.change(keyCode);
             if (this.buttons[KeyCodes.X]) {
-                this.currentLevel = this.menuLevels.selection;
+                this.currentLevel = this.levelsMenu.selection;
                 this.phase("start")
             }
         } else if (this.state === 'start') {
@@ -170,7 +170,7 @@ export class App {
                 cancelAnimationFrame(this.animation);
                 this.animation = null;
                 this.isStopped = true;
-                this.outro();
+                this.finishGame();
             }
         }
     }
@@ -240,8 +240,40 @@ export class App {
         }
     }
 
-    outro() {
+    startGame() {
+        this.initializeMap();
+        let height = this.height / 2;
+        let targetX = 0;
+        let currentX = this.height / 2;
+        let world = this;
+        this.transition.time = new Date();
+        animate();
 
+        function animate() {
+            let time = new Date() - world.transition.time;
+            if (time < world.transition.duration) {
+                world.renderTerrain();
+                world.context.fillStyle = "black";
+                world.context.fillRect(0, 0, world.width, height);
+                world.context.fillRect(0, world.height, world.width, height * -1);
+                height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
+                requestAnimationFrame(animate);
+            } else {
+                world.effects = [];
+                world.players = [];
+                let playerStartPositions = world.level.findAllTilesOfType(TileType.PLAYER);
+                for (let i = 0; i < playerStartPositions.length; i++) {
+                    world.players.push(new Character(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
+                        world.spriteService, world.audioService));
+                }
+
+                world.animate();
+                cancelAnimationFrame(animate);
+            }
+        }
+    }
+
+    finishGame() {
         cancelAnimationFrame(this.animation);
         this.animation = null;
         this.isStopped = true;
@@ -275,39 +307,6 @@ export class App {
         }
     }
 
-    intro() {
-        this.initializeMap();
-        let height = this.height / 2;
-        let targetX = 0;
-        let currentX = this.height / 2;
-        let world = this;
-        this.transition.time = new Date();
-        animate();
-
-        function animate() {
-            let time = new Date() - world.transition.time;
-            if (time < world.transition.duration) {
-                world.renderTerrain();
-                world.context.fillStyle = "black";
-                world.context.fillRect(0, 0, world.width, height);
-                world.context.fillRect(0, world.height, world.width, height * -1);
-                height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
-                requestAnimationFrame(animate);
-            } else {
-                world.effects = [];
-                world.players = [];
-                let playerStartPositions = world.level.findAllTilesOfType(TileType.PLAYER);
-                for (let i = 0; i < playerStartPositions.length; i++) {
-                    world.players.push(new Character(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
-                        world.spriteService, world.audioService));
-                }
-
-                world.animate();
-                cancelAnimationFrame(animate);
-            }
-        }
-    }
-
     phase(phase) {
         this.state = phase;
         cancelAnimationFrame(this.animation);
@@ -324,7 +323,7 @@ export class App {
                 this.menu.render();
                 break;
             case "start":
-                this.intro();
+                this.startGame();
                 break;
             case "fin": // Displays the player's death chart
                 this.spriteService.write(this.context, "thanks for playing :) !", this.width / 2, 15);
@@ -357,7 +356,7 @@ export class App {
                 this.spriteService.write(this.context, "press 'c' to return to menu", this.width / 2, this.height - 30);
                 break;
             case "levels": // Displays menu levels
-                this.menuLevels.render();
+                this.levelsMenu.render();
                 this.context.fillStyle = "#83769c";
                 this.context.fillRect(0, this.height - 35, this.width, 28);
                 this.spriteService.write(this.context, "arrow keys to select 'x' to confirm", this.width / 2, this.height - 30);
@@ -377,7 +376,7 @@ export class App {
                 this.lastLevel = this.currentLevel;
                 localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
             }
-            this.outro();
+            this.finishGame();
             this.audioService.play(AudioService.SUCCESS);
         }
     }
