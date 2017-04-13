@@ -58,29 +58,28 @@ export class SpriteService {
     }
 
     draw(sprite, context, x, y, columnIndex, rowIndex) {
-        this._draw(sprite, context, x, y, undefined, undefined, columnIndex, rowIndex)
+        this._draw(this.sheets[sprite], context, x, y, undefined, undefined, columnIndex, rowIndex)
     }
 
     drawStretched(sprite, context, x, y, width, height, columnIndex, rowIndex) {
-        this._draw(sprite, context, x, y, width, height, columnIndex, rowIndex)
+        this._draw(this.sheets[sprite], context, x, y, width, height, columnIndex, rowIndex)
     }
 
     /**
-     * @param {string} sprite ID of the sprite to draw.
+     * @param {Sprite} spriteSheet Sprite to draw.
      * @param {CanvasRenderingContext2D} context Rendering context to use.
-     * @param {Number} x Position on the canvas to render the sprite to. (left of the sprite)
-     * @param {Number} y Position on the canvas to render the sprite to. (top of the sprite)
-     * @param {Number?} columnIndex Default is 0.
-     * @param {Number?} rowIndex Default is 0.
-     * @param {Number?} width Width to stretch the sprite to. Default is the sprite's original width (no stretching).
-     * @param {Number?} height Height to stretch the sprite to. Default is the sprite's original height (no stretching).
+     * @param {number} x Position on the canvas to render the sprite to. (left of the sprite)
+     * @param {number} y Position on the canvas to render the sprite to. (top of the sprite)
+     * @param {number|undefined} [width] Width to stretch the sprite to. Default is the sprite's original width (no stretching).
+     * @param {number|undefined} [height] Height to stretch the sprite to. Default is the sprite's original height (no stretching).
+     * @param {number} [columnIndex=0]
+     * @param {number} [rowIndex=0]
      */
-    _draw(sprite, context, x, y, width, height, columnIndex, rowIndex) {
+    static _draw(spriteSheet, context, x, y, width, height, columnIndex, rowIndex) {
         columnIndex = columnIndex || 0;
         rowIndex = rowIndex || 0;
-        let spriteSheet = this.sheets[sprite];
-        width = (typeof width !== 'undefined') ? width : spriteSheet.spriteWidth;
-        height = (typeof height !== 'undefined') ? height : spriteSheet.spriteHeight;
+        width = (typeof width !== 'number') ? width : spriteSheet.spriteWidth;
+        height = (typeof height !== 'number') ? height : spriteSheet.spriteHeight;
 
         context.drawImage(spriteSheet.image,
             spriteSheet.spriteWidth * columnIndex, spriteSheet.spriteHeight * rowIndex, spriteSheet.spriteWidth, spriteSheet.spriteHeight,
