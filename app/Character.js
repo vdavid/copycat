@@ -4,6 +4,11 @@ import {SpriteService} from "./SpriteService";
 import {AudioService} from "./AudioService";
 import {KeyCodes} from "./KeyCodes";
 
+const DIRECTION_UP = Symbol('DIRECTION_UP');
+const DIRECTION_DOWN = Symbol('DIRECTION_DOWN');
+const DIRECTION_LEFT = Symbol('DIRECTION_LEFT');
+const DIRECTION_RIGHT = Symbol('DIRECTION_RIGHT');
+
 export class Character {
     /**
      *
@@ -23,7 +28,7 @@ export class Character {
             y: y
         };
         this._tileSize = world.tileSize;
-        this.target = {
+        this._target = {
             x: this._position.x * this._tileSize,
             y: this._position.y * this._tileSize,
         };
@@ -41,7 +46,7 @@ export class Character {
         this.lastDirection = "none";
         this._canMove = true;
         this._collision = false;
-        this.validation = false;
+        this.reachedAnExit = false;
         this.audioService.play(AudioService.APPEARANCE);
         this.world.effects.push(new Effect(this.world, this._currentLocation.x, this._currentLocation.y, this.spriteService.getSpriteSheet(SpriteService.EXPLOSION)));
     }
@@ -49,44 +54,28 @@ export class Character {
     control() {
         if (!this._transition.state && this._canMove) {
             if (this.world.buttons[KeyCodes.UP]) {
-                this.navigate("up");
+                this.navigate(DIRECTION_UP);
             }
             if (this.world.buttons[KeyCodes.RIGHT]) {
-                this.navigate("right");
+                this.navigate(DIRECTION_RIGHT);
             }
             if (this.world.buttons[KeyCodes.LEFT]) {
-                this.navigate("left");
+                this.navigate(DIRECTION_LEFT);
             }
             if (this.world.buttons[KeyCodes.DOWN]) {
-                this.navigate("down");
+                this.navigate(DIRECTION_DOWN);
             }
         }
     }
 
     navigate(direction) {
-        let movement = {};
-        switch (direction) {
-            case "left":
-                movement = {x: this._position.x - 1, y: this._position.y};
-                break;
-            case "right":
-                movement = {x: this._position.x + 1, y: this._position.y};
-                break;
-            case "down":
-                movement = {x: this._position.x, y: this._position.y + 1};
-                break;
-            case "up":
-                movement = {x: this._position.x, y: this._position.y - 1};
-                break;
-        }
-        this.move(movement, direction);
-    }
-
-    move(coordinates, direction) {
         if (!this._transition.state) {
-            this.targetTile = this.world.infoClef(coordinates.x, coordinates.y);
-            if (!this.targetTile.collision) {
-                if (this.targetTile.action === "slide") {
+            let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
+            let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
+
+            this._targetTile = this.world.infoClef(this._position.x + deltaX, this._position.y + deltaY);
+            if (!this._targetTile.collision) {
+                if (this._targetTile.action === "slide") {
                     this._transition.style = "slide";
                     this._transition.duration = 80;
                 } else {
@@ -94,14 +83,14 @@ export class Character {
                     this._transition.duration = 200;
                 }
                 this._collision = false;
-                this.validation = false;
+                this.reachedAnExit = false;
                 this._transition.state = true;
                 this.lastDirection = direction;
                 this._transition.time = new Date();
-                this._position.x = coordinates.x;
-                this._position.y = coordinates.y;
-                this.target.x = this._position.x * this._tileSize;
-                this.target.y = this._position.y * this._tileSize;
+                this._position.x += deltaX;
+                this._position.y += deltaY;
+                this._target.x = this._position.x * this._tileSize;
+                this._target.y = this._position.y * this._tileSize;
             } else {
                 this._collision = true;
             }
@@ -113,20 +102,20 @@ export class Character {
             let time = new Date() - this._transition.time;
             if (time < this._transition.duration) {
                 if (this._transition.style === "walk") {
-                    this.spriteSheet.position.x = Math.easeInOutQuart(time, this._currentLocation.x, this.target.x - this._currentLocation.x, this._transition.duration);
-                    this.spriteSheet.position.y = Math.easeInOutQuart(time, this._currentLocation.y, this.target.y - this._currentLocation.y, this._transition.duration);
+                    this.spriteSheet.position.x = Math.easeInOutQuart(time, this._currentLocation.x, this._target.x - this._currentLocation.x, this._transition.duration);
+                    this.spriteSheet.position.y = Math.easeInOutQuart(time, this._currentLocation.y, this._target.y - this._currentLocation.y, this._transition.duration);
                 } else {
-                    this.spriteSheet.position.x = Math.linearTween(time, this._currentLocation.x, this.target.x - this._currentLocation.x, this._transition.duration);
-                    this.spriteSheet.position.y = Math.linearTween(time, this._currentLocation.y, this.target.y - this._currentLocation.y, this._transition.duration);
+                    this.spriteSheet.position.x = Math.linearTween(time, this._currentLocation.x, this._target.x - this._currentLocation.x, this._transition.duration);
+                    this.spriteSheet.position.y = Math.linearTween(time, this._currentLocation.y, this._target.y - this._currentLocation.y, this._transition.duration);
                 }
             } else {
                 this._transition.state = false;
-                this.spriteSheet.position.x = this.target.x;
-                this.spriteSheet.position.y = this.target.y;
-                this._currentLocation.x = this.target.x;
-                this._currentLocation.y = this.target.y;
+                this.spriteSheet.position.x = this._target.x;
+                this.spriteSheet.position.y = this._target.y;
+                this._currentLocation.x = this._target.x;
+                this._currentLocation.y = this._target.y;
                 // Does different stuff depending on target tile type
-                switch (this.targetTile.action) {
+                switch (this._targetTile.action) {
                     case "slide":
                         this.navigate(this.lastDirection);
                         this._canMove = this._collision;
@@ -134,22 +123,22 @@ export class Character {
                     case "left":
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate("left");
+                        this.navigate(DIRECTION_LEFT);
                         break;
                     case "up":
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate("up");
+                        this.navigate(DIRECTION_UP);
                         break;
                     case "down":
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate("down");
+                        this.navigate(DIRECTION_DOWN);
                         break;
                     case "right":
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
-                        this.navigate("right");
+                        this.navigate(DIRECTION_RIGHT);
                         break;
                     case "trap":
                         this.audioService.play(AudioService.MOVEMENT);
@@ -158,14 +147,14 @@ export class Character {
                         this._canMove = true;
                         break;
                     case "nextLevel":
-                        this.validation = true;
+                        this.reachedAnExit = true;
                         this._canMove = true;
-                        this.world.action("nextLevel");
+                        this.world.checkLevelCompletion();
                         break;
                     default:
                         this.audioService.play(AudioService.MOVEMENT);
                         this._canMove = true;
-                        this.validation = false;
+                        this.reachedAnExit = false;
                     // sol normal
                 }
             }

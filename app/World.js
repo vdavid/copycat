@@ -539,31 +539,15 @@ export class World {
         }
     }
 
-    action(action) {
-        switch (action) {
-            case "nextLevel":
-                let tab = [];
-                for (let i = 0; i < this.cats.length; i++) {
-                    tab.push(this.cats[i].validation);
-                }
-                let confirmation = tab.every(function (vrai) {
-                    return vrai === true;
-                });
-                if (confirmation) {
-                    this.currentLevel += 1;
-                    if (this.lastLevel < this.currentLevel) {
-                        this.lastLevel = this.currentLevel;
-                        localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
-                    }
-                    this.outro();
-                    this.audioService.play(AudioService.SUCCESS);
-                }
-
-                break;
-            case "other":
-                break;
-            default:
-                console.log("Invalid action");
+    checkLevelCompletion() {
+        if (this.cats.every(cat => { return cat.reachedAnExit; })) {
+            this.currentLevel += 1;
+            if (this.lastLevel < this.currentLevel) {
+                this.lastLevel = this.currentLevel;
+                localStorage.setItem("copycat", JSON.stringify(this.currentLevel));
+            }
+            this.outro();
+            this.audioService.play(AudioService.SUCCESS);
         }
     }
 }
