@@ -1,13 +1,13 @@
 export class Sprite {
-    constructor(world, parent, sprite) {
+    constructor(world, positionX, positionY, spriteSheet) {
         this.context = world.context;
-        this.spriteSheet = sprite;
+        this.spriteSheet = spriteSheet;
         this.tileSize = world.tileSize;
         this.width = Math.round(this.spriteSheet.image.width / this.spriteSheet.columnCount);
         this.height = this.spriteSheet.image.height / this.spriteSheet.rowCount;
         this.position = {
-            x: parent.position.x * this.tileSize,
-            y: parent.position.y * this.tileSize
+            x: positionX * this.tileSize,
+            y: positionY * this.tileSize
         };
         this.length = this.spriteSheet.columnCount;
         this.frame = 0;

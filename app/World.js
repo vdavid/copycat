@@ -2,6 +2,7 @@ import {Menu} from "./Menu";
 import {Character} from "./Character";
 import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
+import {KeyCodes} from "./KeyCodes";
 
 export class World {
     constructor(settings, levels) {
@@ -76,26 +77,22 @@ export class World {
                 this.world.spriteService.draw(SpriteService.CURSOR_FRAME, this.world.context, 16 + Math.floor(this.selection % 7) * 32, 51 + Math.floor(this.selection / 7) * 32);
             },
             change: function (keyCode) {
-                if (keyCode === 38 && this.selection - 6 > 0) {
-                    // up
+                if (keyCode === KeyCodes.UP && this.selection - 6 > 0) {
                     this.world.audioService.play(AudioService.SELECTION);
                     this.selection -= 7;
                     this.render();
                 }
-                if (keyCode === 40 && this.selection + 7 < this.world.lastLevel) {
-                    // down
+                if (keyCode === KeyCodes.DOWN && this.selection + 7 < this.world.lastLevel) {
                     this.world.audioService.play(AudioService.SELECTION);
                     this.selection += 7;
                     this.render();
                 }
-                if (keyCode === 37 && this.selection > 0) {
-                    // left
+                if (keyCode === KeyCodes.LEFT && this.selection > 0) {
                     this.world.audioService.play(AudioService.SELECTION);
                     this.selection -= 1;
                     this.render();
                 }
-                if (keyCode === 39 && this.selection + 1 < this.world.lastLevel) {
-                    // right
+                if (keyCode === KeyCodes.RIGHT && this.selection + 1 < this.world.lastLevel) {
                     this.world.audioService.play(AudioService.SELECTION);
                     this.selection += 1;
                     this.render();
@@ -168,7 +165,7 @@ export class World {
     /* Events */
     touchePresse(event) {
         this.buttons[event.keyCode] = true;
-        if (this.buttons[70]) {
+        if (this.buttons[KeyCodes.F]) {
             this.toggleFullscreen();
         }
         switch (this.state) {
@@ -395,7 +392,8 @@ export class World {
         this.cats = [];
         let posCat = this.findKey("player");
         for (let i = 0; i < posCat.length; i++) {
-            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet(SpriteService.PLAYER)));
+            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, this.spriteService.getSpriteSheet(SpriteService.PLAYER),
+                this.spriteService, this.audioService));
         }
     }
 

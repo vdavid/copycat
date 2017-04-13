@@ -1,15 +1,18 @@
 export class SpriteService {
     constructor() {
-        this.sheets = {};
+        this._sheets = {};
     }
 
     loadResources(progressCallback) {
         for (let i = 0; i < resources.length; i++) {
-            this._loadImage(resources[i].url)
+            loadImage(resources[i].url)
                 .then(image => {
-                    this.sheets[resources[i].name] = {
-                        image: image, columnCount: resources[i].columnCount, rowCount: resources[i].rowCount,
-                        spriteWidth: resources[i].spriteWidth, spriteHeight: resources[i].spriteHeight
+                    this._sheets[resources[i].name] = {
+                        image: image,
+                        columnCount: resources[i].columnCount,
+                        rowCount: resources[i].rowCount,
+                        spriteWidth: resources[i].spriteWidth,
+                        spriteHeight: resources[i].spriteHeight
                     };
                     progressCallback();
                 })
@@ -23,7 +26,7 @@ export class SpriteService {
     write(context, text, centerX, centerY) {
         let alphabet = "abcdefghijklmnopqrstuvwxyz0123456789 ?!():'";
 
-        let characterWidth = this.sheets[SpriteService.FONT].spriteWidth;
+        let characterWidth = this._sheets[SpriteService.FONT].spriteWidth;
         let textLengthInPixels = text.length * characterWidth;
         for (let i = 0; i < text.length; i++) {
             this.draw(SpriteService.FONT, context, (centerX - textLengthInPixels / 2) + (i * characterWidth), centerY, alphabet.indexOf(text.charAt(i)), 0);
@@ -58,56 +61,28 @@ export class SpriteService {
     }
 
     draw(sprite, context, x, y, columnIndex, rowIndex) {
-        this._draw(this.sheets[sprite], context, x, y, undefined, undefined, columnIndex, rowIndex)
+        draw(this._sheets[sprite], context, x, y, undefined, undefined, columnIndex, rowIndex)
     }
 
     drawStretched(sprite, context, x, y, width, height, columnIndex, rowIndex) {
-        this._draw(this.sheets[sprite], context, x, y, width, height, columnIndex, rowIndex)
-    }
-
-    /**
-     * @param {Sprite} spriteSheet Sprite to draw.
-     * @param {CanvasRenderingContext2D} context Rendering context to use.
-     * @param {number} x Position on the canvas to render the sprite to. (left of the sprite)
-     * @param {number} y Position on the canvas to render the sprite to. (top of the sprite)
-     * @param {number|undefined} [width] Width to stretch the sprite to. Default is the sprite's original width (no stretching).
-     * @param {number|undefined} [height] Height to stretch the sprite to. Default is the sprite's original height (no stretching).
-     * @param {number} [columnIndex=0]
-     * @param {number} [rowIndex=0]
-     */
-    static _draw(spriteSheet, context, x, y, width, height, columnIndex, rowIndex) {
-        columnIndex = columnIndex || 0;
-        rowIndex = rowIndex || 0;
-        width = (typeof width !== 'number') ? width : spriteSheet.spriteWidth;
-        height = (typeof height !== 'number') ? height : spriteSheet.spriteHeight;
-
-        context.drawImage(spriteSheet.image,
-            spriteSheet.spriteWidth * columnIndex, spriteSheet.spriteHeight * rowIndex, spriteSheet.spriteWidth, spriteSheet.spriteHeight,
-            x, y, width, height);
+        draw(this._sheets[sprite], context, x, y, width, height, columnIndex, rowIndex)
     }
 
     getSpriteSheet(name) {
-        return this.sheets[name];
+        return this._sheets[name];
     }
 
     static getSupportedSpriteSheetCount() {
         return resources.length;
     }
 
-    _loadImage(url) {
-        return new Promise((resolve, reject) => {
-            let image = new Image();
-            image.addEventListener('load', resolve(image));
-            image.addEventListener('error', reject(new Error('Failed to load image with url: ' + url)));
-            image.src = url;
-        });
-    }
 
     getLockImage() {
-        return this.sheets[SpriteService.LOCK].image;
+        return this._sheets[SpriteService.LOCK].image;
     }
 }
 
+/* Defines constants */
 SpriteService.ARROWS = Symbol('ARROWS');
 SpriteService.CURSOR_FRAME = Symbol('CURSOR_FRAME');
 SpriteService.DUST = Symbol('DUST');
@@ -121,6 +96,7 @@ SpriteService.TILES = Symbol('TILES');
 SpriteService.TITLE = Symbol('TITLE');
 SpriteService.PATTERN = Symbol('PATTERN');
 
+/* Defines resources */
 const resources = [
     {name: SpriteService.ARROWS, url: "./resources/images/arrows.png", columnCount: 4, rowCount: 1, spriteWidth: 16, spriteHeight: 16},
     {name: SpriteService.CURSOR_FRAME, url: "./resources/images/cursor-frame.png", columnCount: 1, rowCount: 1, spriteWidth: 32, spriteHeight: 32},
@@ -136,3 +112,34 @@ const resources = [
     {name: SpriteService.PATTERN, url: "./resources/images/pattern.png", columnCount: 2, rowCount: 2, spriteWidth: 16, spriteHeight: 16},
 ];
 
+/* Private static methods follow */
+
+function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        let image = new Image();
+        image.addEventListener('load', resolve(image));
+        image.addEventListener('error', reject(new Error('Failed to load image with url: ' + url)));
+        image.src = url;
+    });
+}
+
+/**
+ * @param {Object} spriteSheet Sprite to draw.
+ * @param {CanvasRenderingContext2D} context Rendering context to use.
+ * @param {number} x Position on the canvas to render the sprite to. (left of the sprite)
+ * @param {number} y Position on the canvas to render the sprite to. (top of the sprite)
+ * @param {number|undefined} [width] Width to stretch the sprite to. Default is the sprite's original width (no stretching).
+ * @param {number|undefined} [height] Height to stretch the sprite to. Default is the sprite's original height (no stretching).
+ * @param {number} [columnIndex=0]
+ * @param {number} [rowIndex=0]
+ */
+function draw(spriteSheet, context, x, y, width, height, columnIndex, rowIndex) {
+    columnIndex = columnIndex || 0;
+    rowIndex = rowIndex || 0;
+    width = (typeof width === 'number') ? width : spriteSheet.spriteWidth;
+    height = (typeof height === 'number') ? height : spriteSheet.spriteHeight;
+
+    context.drawImage(spriteSheet.image,
+        spriteSheet.spriteWidth * columnIndex, spriteSheet.spriteHeight * rowIndex, spriteSheet.spriteWidth, spriteSheet.spriteHeight,
+        x, y, width, height);
+}
