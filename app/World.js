@@ -3,6 +3,7 @@ import {Character} from "./Character";
 import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 import {KeyCodes} from "./KeyCodes";
+import {TileType} from './TileType';
 
 export class World {
     constructor(settings, levels) {
@@ -112,6 +113,7 @@ export class World {
             console.log('%c resources are loaded ' + this.loadedResourceCount + " of " + this.totalResourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
 
             // Initialization + loading
+            this.nettoyer = new Array(TileType.getTileTypeCount()).fill(false);
             this.loadResources(this.keys);
 
             // menu
@@ -146,7 +148,6 @@ export class World {
 
     loadResources(keys) {
         //  Key processing
-        this.nettoyer = new Array(keys.length).fill(false);
         let CM = {};
         for (let i = 0; i < keys.length; i++) {
             let name = keys[i].id;
@@ -155,7 +156,6 @@ export class World {
                 keys[i].spriteSheet = this.spriteService.getSpriteSheet(keys[i].apparence);
                 keys[i].memoireBoucle = false;
                 keys[i].canAnimate = true;
-                keys[i].isAnimated = true;
             }
             CM[name] = keys[i];
         }
@@ -244,23 +244,19 @@ export class World {
      |_|  \___/|_| |_|\___|\__|_|\___/|_| |_|___/
 
      */
-    findKey(keyToFind) {
-        let blockRecherche = [];
+    /**
+     * @returns {Object[]}
+     */
+    findPlayers() {
+        let playerPositions = [];
         for (let j = 0; j < this.board.size.height; j++) {
             for (let i = 0; i < this.board.size.width; i++) {
-                let id = this.board.tiles[j][i];
-                if (this.keys[id].name === keyToFind) {
-                    let info = {
-                        position: {
-                            x: i,
-                            y: j
-                        }
-                    };
-                    blockRecherche.push(info);
+                if (TileType.getNewIdByOldId(this.board.tiles[j][i]) === TileType.PLAYER) {
+                    playerPositions.push({x: i, y: j});
                 }
             }
         }
-        return blockRecherche;
+        return playerPositions;
     }
 
     bitMasking() {
@@ -314,35 +310,35 @@ export class World {
         for (let j = 0; j < this.board.size.height; j++) {
             for (let i = 0; i < this.board.size.width; i++) {
                 let spriteColumnIndex = 0;
-                let spriteRowIndex = 0;
-                let sprite = SpriteService.TILES;
-                let id = this.board.tiles[j][i];
-                if (this.keys[id].apparence === "auto") {
+                let oldId = this.board.tiles[j][i];
+                let newId = TileType.getNewIdByOldId(oldId);
+                let tileTypeId = TileType.getNewIdByOldId(oldId);
+                let spriteRowIndex = TileType.getRowIndex(tileTypeId);
+                let spriteId = SpriteService.TILES;
+                if (TileType.getTile(newId) === "auto") {
                     spriteColumnIndex = Math.floor(this.board.apparence[j][i]);
-                    spriteRowIndex = this.keys[id].rowIndex;
-                } else if (this.keys[id].type === "animated") {
-                    if (!this.keys[id].memoireBoucle) {
-                        if (this.keys[id].canAnimate) {
-                            this.keys[id].frame += this.keys[id].allure;
+                } else if (TileType.isAnimated(newId)) {
+                    if (!this.keys[oldId].memoireBoucle) {
+                        if (this.keys[oldId].canAnimate) {
+                            this.keys[oldId].frame += this.keys[oldId].allure;
                         }
-                        if (this.keys[id].frame >= this.keys[id].spriteSheet.columnCount) {
-                            if (!this.keys[id].isAnimated) {
-                                this.keys[id].canAnimate = false;
+                        if (this.keys[oldId].frame >= this.keys[oldId].spriteSheet.columnCount) {
+                            if (!TileType.isAnimated(tileTypeId)) {
+                                this.keys[oldId].canAnimate = false;
                             }
-                            this.keys[id].frame = 0;
+                            this.keys[oldId].frame = 0;
                         }
-                        this.keys[id].memoireBoucle = true;
+                        this.keys[oldId].memoireBoucle = true;
                         // on sait quel id est déjà passé :^)
-                        this.nettoyer[id] = true;
+                        this.nettoyer[oldId] = true;
                     }
-                    sprite = this.keys[id].apparence;
-                    spriteColumnIndex = Math.floor(this.keys[id].frame);
+                    spriteId = TileType.getTile(newId);
+                    spriteColumnIndex = Math.floor(this.keys[oldId].frame);
 
                 } else {
-                    spriteColumnIndex = Math.floor(this.keys[id].apparence % 16);
-                    spriteRowIndex = Math.floor(this.keys[id].apparence / 16);
+                    spriteColumnIndex = TileType.getTile(newId);
                 }
-                this.spriteService.draw(sprite, this.context, i * this.tileSize, j * this.tileSize, spriteColumnIndex, spriteRowIndex);
+                this.spriteService.draw(spriteId, this.context, i * this.tileSize, j * this.tileSize, spriteColumnIndex, spriteRowIndex);
             }
         }
         for (let i = 0; i < this.nettoyer.length; i++) {
@@ -377,16 +373,6 @@ export class World {
         };
         this.board.apparence = [];
         this.bitMasking();
-    }
-
-    initPlayer() {
-        this.effects = [];
-        this.cats = [];
-        let posCat = this.findKey("player");
-        for (let i = 0; i < posCat.length; i++) {
-            this.cats.push(new Character(this, posCat[i].position.x, posCat[i].position.y, SpriteService.PLAYER,
-                this.spriteService, this.audioService));
-        }
     }
 
     animate() {
@@ -462,8 +448,13 @@ export class World {
                 height = Math.easeInOutQuart(time, currentX, targetX - currentX, world.transition.duration);
                 requestAnimationFrame(animate);
             } else {
-
-                world.initPlayer();
+                world.effects = [];
+                world.cats = [];
+                let positions = world.findPlayers();
+                for (let i = 0; i < positions.length; i++) {
+                    world.cats.push(new Character(world, positions[i].x, positions[i].y, SpriteService.PLAYER,
+                        world.spriteService, world.audioService));
+                }
 
                 world.animate();
                 cancelAnimationFrame(animate);

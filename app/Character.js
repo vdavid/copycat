@@ -3,6 +3,7 @@ import {Sprite} from "./Sprite";
 import {SpriteService} from "./SpriteService";
 import {AudioService} from "./AudioService";
 import {KeyCodes} from "./KeyCodes";
+import {TileType} from './TileType';
 
 const DIRECTION_UP = Symbol('DIRECTION_UP');
 const DIRECTION_DOWN = Symbol('DIRECTION_DOWN');
@@ -28,7 +29,6 @@ export class Character {
         this.buttons = world.buttons;
         this.board = world.board;
         this.effects = world.effects;
-        this.keys = world.keys;
         let tileSize = world.tileSize;
 
         this.spriteService = spriteService;
@@ -83,13 +83,15 @@ export class Character {
                 && this._positionX + deltaX < this.board.size.width
                 && this._positionY + deltaY > -1
                 && this._positionY + deltaY < this.board.size.height) {
-                this._targetTile = this.keys[this.board.tiles[this._positionY + deltaY][this._positionX + deltaX]];
+                this._isTargetTileAccessible = TileType.isAccessible(TileType.getNewIdByOldId(this.board.tiles[this._positionY + deltaY][this._positionX + deltaX]));
+                this._targetTileAction = TileType.getAction(TileType.getNewIdByOldId(this.board.tiles[this._positionY + deltaY][this._positionX + deltaX]));
             } else {
-                this._targetTile = false;
+                this._isTargetTileAccessible = false;
+                this._targetTileAction = TileType.NO_ACTION;
             }
 
-            if (!this._targetTile.collision) {
-                if (this._targetTile.action === "slide") {
+            if (this._isTargetTileAccessible) {
+                if (this._targetTileAction === TileType.SLIDE_ACTION) {
                     this._transition.style = TRANSITION_STYLE_SLIDE;
                     this._transition.durationInMilliseconds = 80;
                 } else {
@@ -129,38 +131,38 @@ export class Character {
                 this._currentXInPixels = this._targetXInPixels;
                 this._currentYInPixels = this._targetYInPixels;
                 // Does different stuff depending on target tile type
-                switch (this._targetTile.action) {
-                    case "slide":
+                switch (this._targetTileAction) {
+                    case TileType.SLIDE_ACTION:
                         this.navigate(this.lastDirection);
                         this._canMove = this._collision;
                         break;
-                    case "left":
+                    case TileType.LEFT_ACTION:
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
                         this.navigate(DIRECTION_LEFT);
                         break;
-                    case "up":
+                    case TileType.UP_ACTION:
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
                         this.navigate(DIRECTION_UP);
                         break;
-                    case "down":
+                    case TileType.DOWN_ACTION:
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
                         this.navigate(DIRECTION_DOWN);
                         break;
-                    case "right":
+                    case TileType.RIGHT_ACTION:
                         this.audioService.play(AudioService.VALIDATION);
                         this._canMove = false;
                         this.navigate(DIRECTION_RIGHT);
                         break;
-                    case "trap":
+                    case TileType.TRAP_ACTION:
                         this.audioService.play(AudioService.MOVEMENT);
                         this.effects.push(new Effect(this.context, this.effects, this._positionX * this._tileSize, this._positionY * this._tileSize, SpriteService.DUST, this.spriteService));
                         this.board.tiles[this._positionY][this._positionX] = 7;
                         this._canMove = true;
                         break;
-                    case "nextLevel":
+                    case TileType.EXIT_ACTION:
                         this.reachedAnExit = true;
                         this._canMove = true;
                         this.world.checkLevelCompletion();
