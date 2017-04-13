@@ -22,7 +22,7 @@ TileType.GRASS = 'GRASS';
 TileType.WALL = 'WALL';
 TileType.ICE = 'ICE';
 TileType.EXIT = 'EXIT';
-TileType.PLAYER = 'PLAYER';
+TileType.START = 'START';
 TileType.TRAP = 'TRAP';
 TileType.HOLE = 'HOLE';
 TileType.FENCE = 'FENCE';
@@ -37,7 +37,7 @@ const tileTypes = {
     [TileType.WALL]: {isAccessible: false, action: TileType.NO_ACTION},
     [TileType.ICE]: {isAccessible: true, action: TileType.SLIDE_ACTION},
     [TileType.EXIT]: {isAccessible: true, action: TileType.EXIT_ACTION},
-    [TileType.PLAYER]: {isAccessible: true, action: TileType.NO_ACTION},
+    [TileType.START]: {isAccessible: true, action: TileType.NO_ACTION},
     [TileType.TRAP]: {isAccessible: true, action: TileType.TRAP_ACTION},
     [TileType.HOLE]: {isAccessible: false, action: TileType.NO_ACTION},
     [TileType.FENCE]: {isAccessible: false, action: TileType.NO_ACTION},

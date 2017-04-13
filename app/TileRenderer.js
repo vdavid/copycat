@@ -64,7 +64,7 @@ const staticTiles = {
     [TileType.GRASS]: {columnIndex: 1, rowIndex: 0},
     [TileType.WALL]: {columnIndex: "auto", rowIndex: 1},
     [TileType.ICE]: {columnIndex: "auto", rowIndex: 2},
-    [TileType.PLAYER]: {columnIndex: 5, rowIndex: 0},
+    [TileType.START]: {columnIndex: 5, rowIndex: 0},
     [TileType.TRAP]: {columnIndex: 6, rowIndex: 0},
     [TileType.HOLE]: {columnIndex: 7, rowIndex: 0},
     [TileType.FENCE]: {columnIndex: "auto", rowIndex: 4},

@@ -56,7 +56,7 @@ function getTiles(rawTileTypes) {
         2: TileType.WALL,
         3: TileType.ICE,
         4: TileType.EXIT,
-        5: TileType.PLAYER,
+        5: TileType.START,
         6: TileType.TRAP,
         7: TileType.HOLE,
         8: TileType.FENCE,

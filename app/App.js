@@ -262,7 +262,7 @@ export class App {
             } else {
                 world.effects = [];
                 world.players = [];
-                let playerStartPositions = world.level.findAllTilesOfType(TileType.PLAYER);
+                let playerStartPositions = world.level.findAllTilesOfType(TileType.START);
                 for (let i = 0; i < playerStartPositions.length; i++) {
                     world.players.push(new Character(world, playerStartPositions[i].x, playerStartPositions[i].y, SpriteService.PLAYER,
                         world.tileRenderer.tileSizeInPixels, world.spriteService, world.audioService));
