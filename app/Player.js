@@ -3,14 +3,12 @@ import {SpriteService} from "./SpriteService";
 import {AudioService} from "./AudioService";
 import {KeyCodes} from "./KeyCodes";
 import {TileType} from "./TileType";
+import {Transition} from "./Transition";
 
 const DIRECTION_UP = Symbol('DIRECTION_UP');
 const DIRECTION_DOWN = Symbol('DIRECTION_DOWN');
 const DIRECTION_LEFT = Symbol('DIRECTION_LEFT');
 const DIRECTION_RIGHT = Symbol('DIRECTION_RIGHT');
-
-const TRANSITION_STYLE_WALK = Symbol('TRANSITION_STYLE_WALK');
-const TRANSITION_STYLE_SLIDE = Symbol('TRANSITION_STYLE_SLIDE');
 
 export class Player {
     /**
@@ -36,24 +34,17 @@ export class Player {
         this._positionY = y;
 
         this._tileSizeInPixels = tileSizeInPixels;
-        this._currentXInPixels = this._positionX * tileSizeInPixels;
-        this._currentYInPixels = this._positionY * tileSizeInPixels;
         this._spriteId = spriteId;
         this._spriteColumnCount = this._spriteService.getSpriteSheet(spriteId).columnCount;
         this._animationFrame = 0;
 
-        this._transition = {
-            isOn: false,
-            time: null,
-            durationInMilliseconds: 200,
-            style: "walk"
-        };
+        this._transition = null;
         this._lastDirection = "none";
         this._canMove = true;
         this._collisionOccurred = false;
         this._hasReachedAnExit = false;
         this._audioService.play(AudioService.APPEARANCE);
-        this._effects.push(new Effect(this._context, this._effects, this._currentXInPixels, this._currentYInPixels, SpriteService.EXPLOSION, this._spriteService));
+        this._effects.push(new Effect(this._context, this._effects, this._positionX * tileSizeInPixels, this._positionY * tileSizeInPixels, SpriteService.EXPLOSION, this._spriteService));
     }
 
     get hasReachedAnExit() {
@@ -61,7 +52,7 @@ export class Player {
     }
 
     control() {
-        if (!this._transition.isOn && this._canMove) {
+        if (!this._transition && this._canMove) {
             if (this._buttons[KeyCodes.UP]) {
                 this._navigate(DIRECTION_UP);
             }
@@ -78,47 +69,38 @@ export class Player {
     }
 
     _navigate(direction) {
-        if (!this._transition.isOn) {
+        if (!this._transition) {
             let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
             let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
 
-            let isTargetTileAccessible;
-            if (this._positionX + deltaX >= 0
-                && this._positionX + deltaX < this._level.width
-                && this._positionY + deltaY >= 0
-                && this._positionY + deltaY < this._level.height) {
-                isTargetTileAccessible = TileType.isAccessible(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
+            this._collisionOccurred = true;
+            this._targetTileAction = TileType.NO_ACTION;
+            if (this._isMovementValid(deltaX, deltaY)) {
+                this._collisionOccurred = !TileType.isAccessible(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
                 this._targetTileAction = TileType.getAction(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
-            } else {
-                isTargetTileAccessible = false;
-                this._targetTileAction = TileType.NO_ACTION;
             }
 
-            this._collisionOccurred = !isTargetTileAccessible;
 
-            if (isTargetTileAccessible) {
-                if (this._targetTileAction === TileType.SLIDE_ACTION) {
-                    this._transition.style = TRANSITION_STYLE_SLIDE;
-                    this._transition.durationInMilliseconds = 80;
-                } else {
-                    this._transition.style = TRANSITION_STYLE_WALK;
-                    this._transition.durationInMilliseconds = 200;
-                }
+            if (!this._collisionOccurred) {
+                this._transition = new Transition(
+                    (this._targetTileAction === TileType.SLIDE_ACTION) ? Transition.STYLE_SLIDE : Transition.STYLE_WALK,
+                    this._positionX, this._positionY, deltaX, deltaY);
                 this._hasReachedAnExit = false;
-                this._transition.isOn = true;
                 this._lastDirection = direction;
-                this._transition.startDateTime = new Date();
                 this._positionX += deltaX;
                 this._positionY += deltaY;
             }
         }
     }
 
-    transition() {
-        if (this._transition.isOn && (new Date() - this._transition.startDateTime >= this._transition.durationInMilliseconds)) {
-            this._transition.isOn = false;
-            this._currentXInPixels = this._positionX * this._tileSizeInPixels;
-            this._currentYInPixels = this._positionY * this._tileSizeInPixels;
+    _isMovementValid(deltaX, deltaY) {
+        return this._positionX + deltaX >= 0 && this._positionX + deltaX < this._level.width
+            && this._positionY + deltaY >= 0 && this._positionY + deltaY < this._level.height;
+    }
+
+    update() {
+        if (this._transition && this._transition.isFinished) {
+            this._transition = null;
 
             /* Does different stuff depending on target tile type */
             this._canMove = true;
@@ -129,16 +111,16 @@ export class Player {
                     : ((this._targetTileAction === TileType.DOWN_ACTION) ? DIRECTION_DOWN
                         : ((this._targetTileAction === TileType.LEFT_ACTION) ? DIRECTION_LEFT : DIRECTION_RIGHT)));
 
-            } else if(this._targetTileAction === TileType.SLIDE_ACTION) {
+            } else if (this._targetTileAction === TileType.SLIDE_ACTION) {
                 this._navigate(this._lastDirection);
                 this._canMove = this._collisionOccurred;
 
-            } else if(this._targetTileAction === TileType.TRAP_ACTION) {
+            } else if (this._targetTileAction === TileType.TRAP_ACTION) {
                 this._audioService.play(AudioService.LANDSLIDE);
                 this._effects.push(new Effect(this._context, this._effects, this._positionX * this._tileSizeInPixels, this._positionY * this._tileSizeInPixels, SpriteService.DUST, this._spriteService));
                 this._level.setTileType(this._positionX, this._positionY, TileType.HOLE);
 
-            } else if(this._targetTileAction === TileType.EXIT_ACTION) {
+            } else if (this._targetTileAction === TileType.EXIT_ACTION) {
                 this._hasReachedAnExit = true;
                 this._world.checkLevelCompletion();
 
@@ -155,29 +137,9 @@ export class Player {
             this._animationFrame = 0;
         }
 
-        let elapsedTime = new Date() - this._transition.startDateTime;
-        let positionXInPixels = this._currentXInPixels;
-        let positionYInPixels = this._currentYInPixels;
-        if (this._transition.isOn) {
-            if (this._transition.style === TRANSITION_STYLE_WALK) {
-                positionXInPixels = easeInOutQuart(elapsedTime, this._currentXInPixels, this._positionX * this._tileSizeInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
-                positionYInPixels = easeInOutQuart(elapsedTime, this._currentYInPixels, this._positionY * this._tileSizeInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
-            } else {
-                positionXInPixels = linearTween(elapsedTime, this._currentXInPixels, this._positionX * this._tileSizeInPixels - this._currentXInPixels, this._transition.durationInMilliseconds);
-                positionYInPixels = linearTween(elapsedTime, this._currentYInPixels, this._positionY * this._tileSizeInPixels - this._currentYInPixels, this._transition.durationInMilliseconds);
-            }
-        }
-        this._spriteService.draw(this._spriteId, this._context, positionXInPixels, positionYInPixels, Math.floor(this._animationFrame), 0);
+        this._spriteService.draw(this._spriteId, this._context,
+            (this._transition ? this._transition.calculateCurrentX() : this._positionX) * this._tileSizeInPixels,
+            (this._transition ? this._transition.calculateCurrentY() : this._positionY) * this._tileSizeInPixels,
+            Math.floor(this._animationFrame), 0);
     }
-}
-
-function linearTween(elapsedTime, startValue, amount, transitionDuration) {
-    return amount * elapsedTime / transitionDuration + startValue;
-}
-
-function easeInOutQuart(elapsedTime, startValue, changeAmount, transitionDuration) {
-    elapsedTime /= transitionDuration / 2;
-    if (elapsedTime < 1) return changeAmount / 2 * elapsedTime * elapsedTime * elapsedTime * elapsedTime + startValue;
-    elapsedTime -= 2;
-    return -changeAmount / 2 * (elapsedTime * elapsedTime * elapsedTime * elapsedTime - 2) + startValue;
 }

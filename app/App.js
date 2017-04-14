@@ -228,7 +228,7 @@ export class App {
         /* Renders player(s) */
         this.players.forEach(player => {
             player.render();
-            player.transition();
+            player.update();
             player.control();
         });
 
