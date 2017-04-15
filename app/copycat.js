@@ -1,5 +1,5 @@
 import {App} from "./App";
-import {levels} from "./data/levels";
+import {rawLevels} from "./data/rawLevels";
 import {KeyCodes} from "./KeyCodes";
 //noinspection ES6UnusedImports,JSUnresolvedVariable
 import css from "./copycat.css";
@@ -12,4 +12,4 @@ window.addEventListener("keydown", function (e) {
     }
 }, false);
 
-new App(levels, 16, 2);
+new App(rawLevels, 16, 2);

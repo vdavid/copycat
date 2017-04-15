@@ -12,21 +12,20 @@ const DIRECTION_RIGHT = Symbol('DIRECTION_RIGHT');
 
 export class Player {
     /**
-     *
-     * @param world
+     * @param level
+     * @param effects
      * @param x
      * @param y
      * @param {Symbol} spriteId
      * @param {Number} tileSizeInPixels
      * @param {SpriteService} spriteService
      * @param {AudioService} audioService
+     * @param {function} levelCompletionCheckCallback
      */
-    constructor(world, x, y, spriteId, tileSizeInPixels, spriteService, audioService) {
-        this._world = world;
-        this._context = world.context;
-        this._buttons = world.buttons;
-        this._level = world.level;
-        this._effects = world.effects;
+    constructor(level, effects, x, y, spriteId, tileSizeInPixels, spriteService, audioService, levelCompletionCheckCallback) {
+        this._level = level;
+        this._effects = effects;
+        this._levelCompletionCheckCallback = levelCompletionCheckCallback;
 
         this._spriteService = spriteService;
         this._audioService = audioService;
@@ -44,25 +43,25 @@ export class Player {
         this._collisionOccurred = false;
         this._hasReachedAnExit = false;
         this._audioService.play(AudioService.APPEARANCE);
-        this._effects.push(new Effect(this._context, this._effects, this._positionX * tileSizeInPixels, this._positionY * tileSizeInPixels, SpriteService.EXPLOSION, this._spriteService));
+        this._effects.push(new Effect(this._effects, this._positionX * tileSizeInPixels, this._positionY * tileSizeInPixels, SpriteService.EXPLOSION, this._spriteService));
     }
 
     get hasReachedAnExit() {
         return this._hasReachedAnExit;
     }
 
-    control() {
+    control(buttons) {
         if (!this._transition && this._canMove) {
-            if (this._buttons[KeyCodes.UP]) {
+            if (buttons[KeyCodes.UP]) {
                 this._navigate(DIRECTION_UP);
             }
-            if (this._buttons[KeyCodes.RIGHT]) {
+            if (buttons[KeyCodes.RIGHT]) {
                 this._navigate(DIRECTION_RIGHT);
             }
-            if (this._buttons[KeyCodes.LEFT]) {
+            if (buttons[KeyCodes.LEFT]) {
                 this._navigate(DIRECTION_LEFT);
             }
-            if (this._buttons[KeyCodes.DOWN]) {
+            if (buttons[KeyCodes.DOWN]) {
                 this._navigate(DIRECTION_DOWN);
             }
         }
@@ -117,12 +116,12 @@ export class Player {
 
             } else if (this._targetTileAction === TileType.TRAP_ACTION) {
                 this._audioService.play(AudioService.LANDSLIDE);
-                this._effects.push(new Effect(this._context, this._effects, this._positionX * this._tileSizeInPixels, this._positionY * this._tileSizeInPixels, SpriteService.DUST, this._spriteService));
+                this._effects.push(new Effect(this._effects, this._positionX * this._tileSizeInPixels, this._positionY * this._tileSizeInPixels, SpriteService.DUST, this._spriteService));
                 this._level.setTileType(this._positionX, this._positionY, TileType.HOLE);
 
             } else if (this._targetTileAction === TileType.EXIT_ACTION) {
                 this._hasReachedAnExit = true;
-                this._world.checkLevelCompletion();
+                this._levelCompletionCheckCallback();
 
             } else {
                 this._audioService.play(AudioService.MOVEMENT);
@@ -137,7 +136,7 @@ export class Player {
             this._animationFrame = 0;
         }
 
-        this._spriteService.draw(this._spriteId, this._context,
+        this._spriteService.draw(this._spriteId,
             (this._transition ? this._transition.calculateCurrentX() : this._positionX) * this._tileSizeInPixels,
             (this._transition ? this._transition.calculateCurrentY() : this._positionY) * this._tileSizeInPixels,
             Math.floor(this._animationFrame), 0);

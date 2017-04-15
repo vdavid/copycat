@@ -1,4 +1,4 @@
-export let levels = [
+export let rawLevels = [
     {
         "name": "start",
         "comment": "try to move forward",

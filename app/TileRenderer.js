@@ -3,12 +3,10 @@ import {SpriteService} from "./SpriteService";
 
 export class TileRenderer {
     /**
-     * @param {CanvasRenderingContext2D} context
      * @param {number} tileSizeInPixels
      * @param {SpriteService} spriteService
      */
-    constructor(context, tileSizeInPixels, spriteService) {
-        this._context = context;
+    constructor(tileSizeInPixels, spriteService) {
         this._tileSizeInPixels = tileSizeInPixels;
         this._spriteService = spriteService;
 
@@ -50,7 +48,7 @@ export class TileRenderer {
                         : getColumnIndex(tileTypeId);
                     spriteRowIndex = getRowIndex(tileTypeId);
                 }
-                this._spriteService.draw(spriteId, this._context, x * this._tileSizeInPixels, y * this._tileSizeInPixels, spriteColumnIndex, spriteRowIndex);
+                this._spriteService.draw(spriteId, x * this._tileSizeInPixels, y * this._tileSizeInPixels, spriteColumnIndex, spriteRowIndex);
             }
         }
         for (let tileTypeId of Object.keys(animatedTiles)) {

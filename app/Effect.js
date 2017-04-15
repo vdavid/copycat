@@ -1,17 +1,15 @@
 export class Effect {
     /**
      *
-     * @param {CanvasRenderingContext2D} context
      * @param {Array} effects
      * @param {Number} positionXInPixels
      * @param {Number} positionYInPixels
      * @param {Symbol} spriteId
      * @param {SpriteService} spriteService
      */
-    constructor(context, effects, positionXInPixels, positionYInPixels, spriteId, spriteService) {
+    constructor(effects, positionXInPixels, positionYInPixels, spriteId, spriteService) {
         let spriteSheet = spriteService.getSpriteSheet(spriteId);
 
-        this._context = context;
         this._effects = effects;
         this._spriteId = spriteId;
         this._spriteService = spriteService;
@@ -27,7 +25,7 @@ export class Effect {
         if (this._frame >= this._length) {
             this._effects.splice(this._effects.indexOf(this), 1);
         }
-        this._spriteService.draw(this._spriteId, this._context,
+        this._spriteService.draw(this._spriteId,
             this._positionXInPixels - this._spriteSize / 4, this._positionYInPixels - this._spriteSize / 4,
             Math.floor(this._frame), 0);
     }

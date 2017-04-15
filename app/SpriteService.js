@@ -1,6 +1,7 @@
 export class SpriteService {
-    constructor() {
+    constructor(context) {
         this._sheets = {};
+        this._context = context;
     }
 
     loadResources(progressCallback) {
@@ -23,49 +24,49 @@ export class SpriteService {
         }
     }
 
-    write(context, text, centerX, centerY) {
+    write(text, centerX, centerY) {
         let alphabet = "abcdefghijklmnopqrstuvwxyz0123456789 ?!():'";
 
         let characterWidth = this._sheets[SpriteService.FONT].spriteWidth;
         let textLengthInPixels = text.length * characterWidth;
         for (let i = 0; i < text.length; i++) {
-            this.draw(SpriteService.FONT, context, (centerX - textLengthInPixels / 2) + (i * characterWidth), centerY, alphabet.indexOf(text.charAt(i)), 0);
+            this.draw(SpriteService.FONT, (centerX - textLengthInPixels / 2) + (i * characterWidth), centerY, alphabet.indexOf(text.charAt(i)), 0);
         }
     }
 
-    drawFrame(context, x, y, width, height, backgroundColor) {
-        context.fillStyle = backgroundColor;
+    drawFrame(x, y, width, height, backgroundColor) {
+        this._context.fillStyle = backgroundColor;
 
         /* Draws background */
-        context.fillRect(x + 1, y + 1, width - 2, height - 2);
+        this._context.fillRect(x + 1, y + 1, width - 2, height - 2);
 
         let spriteWidth = this.getSpriteSheet(SpriteService.FRAME).spriteWidth;
         let spriteHeight = this.getSpriteSheet(SpriteService.FRAME).spriteHeight;
 
         /* Top left */
-        this.draw(SpriteService.FRAME, context, x, y, 0, 0);
+        this.draw(SpriteService.FRAME, x, y, 0, 0);
         /* Top right */
-        this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y, 2, 0);
+        this.draw(SpriteService.FRAME, x + width - spriteWidth, y, 2, 0);
         /* Bottom left */
-        this.draw(SpriteService.FRAME, context, x, y + height - spriteHeight, 0, 2);
+        this.draw(SpriteService.FRAME, x, y + height - spriteHeight, 0, 2);
         /* Bottom right */
-        this.draw(SpriteService.FRAME, context, x + width - spriteWidth, y + height - spriteHeight, 2, 2);
+        this.draw(SpriteService.FRAME, x + width - spriteWidth, y + height - spriteHeight, 2, 2);
         /* Top */
-        this.drawStretched(SpriteService.FRAME, context, x + spriteWidth, y, width - 2 * spriteWidth, spriteHeight, 1, 0);
+        this.drawStretched(SpriteService.FRAME, x + spriteWidth, y, width - 2 * spriteWidth, spriteHeight, 1, 0);
         /* Bottom */
-        this.drawStretched(SpriteService.FRAME, context, x + spriteWidth, y + height - spriteHeight, width - 2 * spriteWidth, spriteHeight, 1, 2);
+        this.drawStretched(SpriteService.FRAME, x + spriteWidth, y + height - spriteHeight, width - 2 * spriteWidth, spriteHeight, 1, 2);
         /* Left */
-        this.drawStretched(SpriteService.FRAME, context, x, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 0, 1);
+        this.drawStretched(SpriteService.FRAME, x, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 0, 1);
         /* Right */
-        this.drawStretched(SpriteService.FRAME, context, x + width - spriteWidth, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 2, 1);
+        this.drawStretched(SpriteService.FRAME, x + width - spriteWidth, y + spriteHeight, spriteWidth, height - 2 * spriteHeight, 2, 1);
     }
 
-    draw(spriteId, context, x, y, columnIndex, rowIndex) {
-        draw(this._sheets[spriteId], context, x, y, undefined, undefined, columnIndex, rowIndex)
+    draw(spriteId, x, y, columnIndex, rowIndex) {
+        draw(this._sheets[spriteId], this._context, x, y, undefined, undefined, columnIndex, rowIndex)
     }
 
-    drawStretched(spriteId, context, x, y, width, height, columnIndex, rowIndex) {
-        draw(this._sheets[spriteId], context, x, y, width, height, columnIndex, rowIndex)
+    drawStretched(spriteId, x, y, width, height, columnIndex, rowIndex) {
+        draw(this._sheets[spriteId], this._context, x, y, width, height, columnIndex, rowIndex)
     }
 
     getSpriteSheet(spriteId) {
