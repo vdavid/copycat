@@ -14,27 +14,16 @@ export class App {
         this.isFullScreen = false;
         // Frames per second
         //this.fps = 60;
-        this.width = tileSize * 16;
-        this.height = tileSize * 16;
         this.tileSize = tileSize;
 
         /* Initializes HTML canvas */
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = tileSize * 16;
-        this.canvas.height = tileSize * 16;
-        this.canvas.style.width = this.width * this.zoom + "px";
-        this.canvas.style.height = this.height * this.zoom + "px";
-        document.body.appendChild(this.canvas);
-        this.context = this.canvas.getContext('2d');
-        this.context.msImageSmoothingEnabled = false;
-        this.context.imageSmoothingEnabled = false;
+        this._context = createCanvas(tileSize, zoom);
 
         /* Loads audio and image files */
         this.loadedResourceCount = 0;
         this.audioService = new AudioService(0.05);
-        this.spriteService = new SpriteService(this.context);
+        this.spriteService = new SpriteService(this._context);
 
-        this.totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
         this.spriteService.loadResources(() => {
             this.updateProgress();
         });
@@ -61,13 +50,13 @@ export class App {
 
     updateProgress() {
         this.loadedResourceCount += 1;
-        if (this.loadedResourceCount === this.totalResourceCount) {
-            console.log('%c resources are loaded ' + this.loadedResourceCount + " of " + this.totalResourceCount, 'padding:2px; border-left:2px solid green; background: lightgreen; color: #000');
-            this._appMenu = new AppMenu(this.context, this.buttons, this.width, this.height, this._rawLevels.length, this.lastLevel, this.spriteService, this.audioService);
+        let totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
+        if (this.loadedResourceCount === totalResourceCount) {
+            this._appMenu = new AppMenu(this._context, this.buttons, this._rawLevels.length, this.lastLevel, this.spriteService, this.audioService);
 
             let defaultLevel = new Level(this._rawLevels[this._currentLevelIndex].name,
                 this._rawLevels[this._currentLevelIndex].tiles, this._rawLevels[this._currentLevelIndex].comment);
-            this._game = new Game(this.context, this.width, this.height, this.tileSize, defaultLevel, this.spriteService, this.audioService,
+            this._game = new Game(this._context, this.tileSize, defaultLevel, this.spriteService, this.audioService,
                 (success, restart) => this.finishGame(success, restart));
 
             // End of initialization
@@ -77,10 +66,10 @@ export class App {
             this._appMenu.render();
         } else {
             // Loading screen
-            this.context.fillStyle = "#000";
-            this.context.fillRect(0, 0, this.width, this.height);
-            this.context.fillStyle = "#fff";
-            this.context.fillRect(0, (this.height / 2) - 1, (this.loadedResourceCount * this.width) / this.totalResourceCount, 2);
+            this._context.fillStyle = "#000";
+            this._context.fillRect(0, 0, this._context.canvas.width, this._context.canvas.height);
+            this._context.fillStyle = "#fff";
+            this._context.fillRect(0, (this._context.canvas.height / 2) - 1, (this.loadedResourceCount * this._context.canvas.width) / totalResourceCount, 2);
         }
     }
 
@@ -94,7 +83,7 @@ export class App {
             let result = this._appMenu.handleKeyDownEvent(keyCode);
             if (result.startGame) {
                 this.state = 'start';
-                if (result.levelIndex) {
+                if (typeof result.levelIndex === 'number') {
                     this._currentLevelIndex = result.levelIndex;
                 }
                 this.startGame();
@@ -107,16 +96,16 @@ export class App {
     toggleFullscreen() {
         if (!this.isFullScreen) {
             //noinspection JSUnresolvedFunction
-            this.canvas.webkitRequestFullScreen();
+            this._context.canvas.webkitRequestFullScreen();
             this.isFullScreen = true;
-            this.canvas.style.width = "100vmin";
-            this.canvas.style.height = "100vmin";
+            this._context.canvas.style.width = "100vmin";
+            this._context.canvas.style.height = "100vmin";
         } else {
             //noinspection JSUnresolvedFunction
             document.webkitCancelFullScreen();
             this.isFullScreen = false;
-            this.canvas.style.width = this.width * this.zoom + "px";
-            this.canvas.style.height = this.height * this.zoom + "px";
+            this._context.canvas.style.width = this._context.canvas.width * this.zoom + "px";
+            this._context.canvas.style.height = this._context.canvas.height * this.zoom + "px";
         }
     }
 
@@ -134,9 +123,9 @@ export class App {
     startGame() {
         this._game.level = new Level(this._rawLevels[this._currentLevelIndex].name,
             this._rawLevels[this._currentLevelIndex].tiles, this._rawLevels[this._currentLevelIndex].comment);
-        let height = this.height / 2;
+        let height = this._context.canvas.height / 2;
         let targetX = 0;
-        let currentX = this.height / 2;
+        let currentX = this._context.canvas.height / 2;
         let app = this;
         this.transition.time = new Date();
         animate();
@@ -145,9 +134,9 @@ export class App {
             let time = new Date() - app.transition.time;
             if (time < app.transition.duration) {
                 app._game.renderTerrain();
-                app.context.fillStyle = "black";
-                app.context.fillRect(0, 0, app.width, height);
-                app.context.fillRect(0, app.height, app.width, height * -1);
+                app._context.fillStyle = "black";
+                app._context.fillRect(0, 0, app._context.canvas.width, height);
+                app._context.fillRect(0, app._context.canvas.height, app._context.canvas.width, height * -1);
                 height = easeInOutQuart(time, currentX, targetX - currentX, app.transition.duration);
                 requestAnimationFrame(animate);
             } else {
@@ -174,9 +163,8 @@ export class App {
             this.audioService.play(AudioService.SUCCESS);
         }
 
-        this.context.fillStyle = "black";
         let height = 0;
-        let targetX = this.height / 2;
+        let targetX = this._context.canvas.height / 2;
         let currentX = 0;
         this.transition.time = new Date();
         let app = this;
@@ -185,8 +173,9 @@ export class App {
         function animate() {
             let time = new Date() - app.transition.time;
             if (time < app.transition.duration) {
-                app.context.fillRect(0, 0, app.width, height);
-                app.context.fillRect(0, app.height, app.width, height * -1);
+                app._context.fillStyle = "black";
+                app._context.fillRect(0, 0, app._context.canvas.width, height);
+                app._context.fillRect(0, app._context.canvas.height, app._context.canvas.width, height * -1);
                 height = easeInOutQuart(time, currentX, targetX - currentX, app.transition.duration);
                 requestAnimationFrame(animate);
             } else {
@@ -210,4 +199,18 @@ function easeInOutQuart(elapsedTime, startValue, changeAmount, transitionDuratio
     if (elapsedTime < 1) return changeAmount / 2 * elapsedTime * elapsedTime * elapsedTime * elapsedTime + startValue;
     elapsedTime -= 2;
     return -changeAmount / 2 * (elapsedTime * elapsedTime * elapsedTime * elapsedTime - 2) + startValue;
+}
+
+function createCanvas(tileSize, zoom) {
+    let canvas = document.createElement("canvas");
+    canvas.width = tileSize * 16;
+    canvas.height = tileSize * 16;
+    canvas.style.width = canvas.width * zoom + "px";
+    canvas.style.height = canvas.height * zoom + "px";
+    document.body.appendChild(canvas);
+    let context = canvas.getContext('2d');
+    context.msImageSmoothingEnabled = false;
+    context.imageSmoothingEnabled = false;
+
+    return context;
 }
