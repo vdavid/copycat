@@ -4,17 +4,17 @@ import {KeyCodes} from "./KeyCodes";
 import {Level} from "./Level";
 import {Game} from "./Game";
 import {AppMenu} from "./AppMenu";
+import {ScreenTransitionRenderer} from "./ScreenTransitionRenderer";
 
 export class App {
     constructor(rawLevels, tileSize, zoom) {
-        // settings
         this.zoom = zoom || 2;
+        this.tileSize = tileSize;
+        this._rawLevels = rawLevels;
 
         this.buttons = [];
         this.isFullScreen = false;
-        // Frames per second
-        //this.fps = 60;
-        this.tileSize = tileSize;
+        // Frames per second: this.fps = 60;
 
         /* Initializes HTML canvas */
         this._context = createCanvas(tileSize, zoom);
@@ -23,6 +23,7 @@ export class App {
         this.loadedResourceCount = 0;
         this.audioService = new AudioService(0.05);
         this.spriteService = new SpriteService(this._context);
+        this._screenTransitionRenderer = new ScreenTransitionRenderer();
 
         this.spriteService.loadResources(() => {
             this.updateProgress();
@@ -33,8 +34,6 @@ export class App {
 
         this.state = "menu";
 
-        // levels
-        this._rawLevels = rawLevels;
         this._currentLevelIndex = 0;
 
         if (!localStorage['copycat']) {
@@ -42,10 +41,6 @@ export class App {
         }
         // Recovers last save
         this.lastLevel = JSON.parse(localStorage['copycat']);
-        //transition
-        this.transition = {
-            duration: 800,
-        };
     }
 
     updateProgress() {
@@ -88,7 +83,7 @@ export class App {
                 }
                 this.startGame();
             }
-        } else if(this.state === 'start') {
+        } else if (this.state === 'start') {
             this._game.handleKeyDownEvent(keyCode);
         }
     }
@@ -109,40 +104,12 @@ export class App {
         }
     }
 
-    /*
-     ______           _
-     |  ____|         (_)
-     | |__   _ __      _  ___ _   _
-     |  __| | '_ \    | |/ _ \ | | |
-     | |____| | | |   | |  __/ |_| |
-     |______|_| |_|   | |\___|\__,_|
-     _/ |
-     |__/
-     */
-
     startGame() {
         this._game.level = new Level(this._rawLevels[this._currentLevelIndex].name,
             this._rawLevels[this._currentLevelIndex].tiles, this._rawLevels[this._currentLevelIndex].comment);
-        let height = this._context.canvas.height / 2;
-        let targetX = 0;
-        let currentX = this._context.canvas.height / 2;
-        let app = this;
-        this.transition.time = new Date();
-        animate();
 
-        function animate() {
-            let time = new Date() - app.transition.time;
-            if (time < app.transition.duration) {
-                app._game.renderTerrain();
-                app._context.fillStyle = "black";
-                app._context.fillRect(0, 0, app._context.canvas.width, height);
-                app._context.fillRect(0, app._context.canvas.height, app._context.canvas.width, height * -1);
-                height = easeInOutQuart(time, currentX, targetX - currentX, app.transition.duration);
-                requestAnimationFrame(animate);
-            } else {
-                app._game.start();
-            }
-        }
+        this._screenTransitionRenderer.slideVertically(this._context, 800, ScreenTransitionRenderer.OPEN, () => this._game.renderTerrain())
+            .then(() => this._game.start());
     }
 
     finishGame(success, restart) {
@@ -163,42 +130,19 @@ export class App {
             this.audioService.play(AudioService.SUCCESS);
         }
 
-        let height = 0;
-        let targetX = this._context.canvas.height / 2;
-        let currentX = 0;
-        this.transition.time = new Date();
-        let app = this;
-        animate();
-
-        function animate() {
-            let time = new Date() - app.transition.time;
-            if (time < app.transition.duration) {
-                app._context.fillStyle = "black";
-                app._context.fillRect(0, 0, app._context.canvas.width, height);
-                app._context.fillRect(0, app._context.canvas.height, app._context.canvas.width, height * -1);
-                height = easeInOutQuart(time, currentX, targetX - currentX, app.transition.duration);
-                requestAnimationFrame(animate);
+        this._screenTransitionRenderer.slideVertically(this._context, 800, ScreenTransitionRenderer.CLOSE, () => {}).then(() => {
+            if (this._currentLevelIndex < this._rawLevels.length) {
+                this.state = 'start';
+                this.startGame();
             } else {
-                if (app._currentLevelIndex < app._rawLevels.length) {
-                    app.state = 'start';
-                    app.startGame();
-                } else {
-                    // fin du jeu
-                    app._currentLevelIndex = 0;
-                    app._appMenu.activePage = AppMenu.FINISHED_LAST_LEVEL_PAGE;
-                    app.state = 'menu';
-                    app._appMenu.render();
-                }
+                // fin du jeu
+                this._currentLevelIndex = 0;
+                this._appMenu.activePage = AppMenu.FINISHED_LAST_LEVEL_PAGE;
+                this.state = 'menu';
+                this._appMenu.render();
             }
-        }
+        });
     }
-}
-
-function easeInOutQuart(elapsedTime, startValue, changeAmount, transitionDuration) {
-    elapsedTime /= transitionDuration / 2;
-    if (elapsedTime < 1) return changeAmount / 2 * elapsedTime * elapsedTime * elapsedTime * elapsedTime + startValue;
-    elapsedTime -= 2;
-    return -changeAmount / 2 * (elapsedTime * elapsedTime * elapsedTime * elapsedTime - 2) + startValue;
 }
 
 function createCanvas(tileSize, zoom) {
