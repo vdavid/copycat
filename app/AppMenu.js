@@ -4,9 +4,8 @@ import {KeyCodes} from "./KeyCodes";
 import {MainMenu} from "./MainMenu";
 
 export class AppMenu {
-    constructor(context, buttons, levelCount, lastUnlockedLevelIndex, spriteService, audioService) {
+    constructor(context, levelCount, lastUnlockedLevelIndex, spriteService, audioService) {
         this._context = context;
-        this._buttons = buttons;
         this._levelCount = levelCount;
         this._lastUnlockedLevelIndex = lastUnlockedLevelIndex;
         this._spriteService = spriteService;

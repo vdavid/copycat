@@ -8,6 +8,10 @@ export class Level {
         this._comment = comment;
     }
 
+    static createFromData(levelData) {
+        return new Level(levelData.name, levelData.tiles, levelData.comment)
+    }
+
     get width() {
         return this._tiles.length;
     }
