@@ -10,26 +10,25 @@ import {ResourceLoader} from "./ResourceLoader";
 
 export class App {
     constructor(rawLevels, tileSize, zoom) {
-        this.zoom = zoom || 2;
-        this.tileSize = tileSize;
+        this._zoom = zoom || 2;
+        this._tileSize = tileSize;
         this._rawLevels = rawLevels;
 
         this._currentLevelIndex = 0;
-        this.isFullScreen = false;
-        this.state = "menu";
+        this._isFullScreen = false;
+        this._state = App.STATE_MENU;
         // Frames per second: this.fps = 60;
 
         /* Initializes HTML canvas */
         this._context = createCanvas(tileSize, zoom);
 
-        /* Loads audio and image files */
         this._audioService = new AudioService(0.05);
         this._spriteService = new SpriteService(this._context);
         this._screenTransitionRenderer = new ScreenTransitionRenderer();
 
         this._appMenu = new AppMenu(this._context, this._rawLevels.length, StateRepository.getLastLevelIndex(5), this._spriteService, this._audioService);
-        this._game = new Game(this._context, this.tileSize, Level.createFromData(this._rawLevels[0]),
-            this._spriteService, this._audioService, (success, restart) => this.finishGame(success, restart));
+        this._game = new Game(this._context, this._tileSize, Level.createFromData(this._rawLevels[0]),
+            this._spriteService, this._audioService, (success, restart) => this._finishGame(success, restart));
 
         let resourceLoader = new ResourceLoader(this._context, this._audioService, this._spriteService, () => this._handleLoadingFinished());
         resourceLoader.loadResources();
@@ -45,25 +44,25 @@ export class App {
     /* Events */
     _handleKeyDownEvent(keyCode) {
         if (keyCode === KeyCodes.F) {
-            this.toggleFullscreen();
+            this._toggleFullscreen();
         }
 
-        if (this.state === 'menu') {
+        if (this._state === App.STATE_MENU) {
             let result = this._appMenu.handleKeyDownEvent(keyCode);
             if (result.startGame) {
                 if (typeof result.levelIndex === 'number') {
                     this._currentLevelIndex = result.levelIndex;
                 }
-                this.startGame();
+                this._startGame();
             }
-        } else if (this.state === 'start') {
+        } else if (this._state === App.STATE_GAME) {
             this._game.handleKeyDownEvent(keyCode);
         }
     }
 
-    toggleFullscreen() {
-        this.isFullScreen = !this.isFullScreen;
-        if (this.isFullScreen) {
+    _toggleFullscreen() {
+        this._isFullScreen = !this._isFullScreen;
+        if (this._isFullScreen) {
             //noinspection JSUnresolvedFunction
             this._context.canvas.webkitRequestFullScreen();
             this._context.canvas.style.width = "100vmin";
@@ -71,23 +70,23 @@ export class App {
         } else {
             //noinspection JSUnresolvedFunction
             document.webkitCancelFullScreen();
-            this._context.canvas.style.width = this._context.canvas.width * this.zoom + "px";
-            this._context.canvas.style.height = this._context.canvas.height * this.zoom + "px";
+            this._context.canvas.style.width = this._context.canvas.width * this._zoom + "px";
+            this._context.canvas.style.height = this._context.canvas.height * this._zoom + "px";
         }
     }
 
-    startGame() {
-        this.state = 'start';
+    _startGame() {
+        this._state = App.STATE_GAME;
         this._game.level = Level.createFromData(this._rawLevels[this._currentLevelIndex]);
 
         this._screenTransitionRenderer.slideVertically(this._context, 800, ScreenTransitionRenderer.OPEN, () => this._game.renderTerrain())
             .then(() => this._game.start());
     }
 
-    finishGame(success, restart) {
+    _finishGame(success, restart) {
         if (!restart && !success) {
             this._appMenu.activePage = AppMenu.MAIN_PAGE;
-            this.state = 'menu';
+            this._state = App.STATE_MENU;
             this._appMenu.render();
         } else {
             if (success) {
@@ -103,11 +102,11 @@ export class App {
             this._screenTransitionRenderer.slideVertically(this._context, 800, ScreenTransitionRenderer.CLOSE, () => {
             }).then(() => {
                 if (this._currentLevelIndex < this._rawLevels.length) {
-                    this.startGame();
+                    this._startGame();
                 } else { /* Last level finished */
                     this._currentLevelIndex = 0;
                     this._appMenu.activePage = AppMenu.FINISHED_LAST_LEVEL_PAGE;
-                    this.state = 'menu';
+                    this._state = App.STATE_MENU;
                     this._appMenu.render();
                 }
             });
@@ -128,3 +127,6 @@ function createCanvas(tileSize, zoom) {
 
     return context;
 }
+
+App.STATE_MENU = Symbol('STATE_MENU');
+App.STATE_GAME = Symbol('STATE_GAME');
