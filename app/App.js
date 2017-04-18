@@ -1,10 +1,11 @@
 import {AudioService} from "./AudioService";
 import {SpriteService} from "./SpriteService";
 import {KeyCodes} from "./KeyCodes";
-import {Level} from "./Level";
-import {Game} from "./Game";
-import {AppMenu} from "./AppMenu";
+import {Level} from "./game/Level";
+import {Game} from "./game/Game";
+import {AppMenu} from "./menu/AppMenu";
 import {ScreenTransitionRenderer} from "./ScreenTransitionRenderer";
+import {StateRepository} from "./StateRepository";
 
 export class App {
     constructor(rawLevels, tileSize, zoom) {
@@ -22,28 +23,22 @@ export class App {
 
         /* Loads audio and image files */
         this.loadedResourceCount = 0;
-        this.audioService = new AudioService(0.05);
-        this.spriteService = new SpriteService(this._context);
+        this._audioService = new AudioService(0.05);
+        this._spriteService = new SpriteService(this._context);
         this._screenTransitionRenderer = new ScreenTransitionRenderer();
 
-        this._appMenu = new AppMenu(this._context, this._rawLevels.length, this.lastLevel, this.spriteService, this.audioService);
+        this._appMenu = new AppMenu(this._context, this._rawLevels.length, StateRepository.getLastLevelIndex(5), this._spriteService, this._audioService);
         this._game = new Game(this._context, this.tileSize, Level.createFromData(this._rawLevels[0]),
-            this.spriteService, this.audioService, (success, restart) => this.finishGame(success, restart));
+            this._spriteService, this._audioService, (success, restart) => this.finishGame(success, restart));
         document.addEventListener("keydown", event => this._handleKeyDownEvent(event.keyCode), false);
         document.addEventListener("keyup", event => this._game.handleKeyUpEvent(event.keyCode), false);
 
-        this.spriteService.loadResources(() => {
+        this._spriteService.loadResources(() => {
             this.updateProgress();
         });
-        this.audioService.loadResources(() => {
+        this._audioService.loadResources(() => {
             this.updateProgress();
         });
-
-        if (!localStorage['copycat']) {
-            localStorage.setItem("copycat", JSON.stringify(5)); // Default "Last level" is 5.
-        }
-        // Recovers last save
-        this.lastLevel = JSON.parse(localStorage['copycat']);
     }
 
     updateProgress() {
@@ -119,7 +114,7 @@ export class App {
                     localStorage.setItem("copycat", JSON.stringify(this._currentLevelIndex));
                     this._appMenu.lastUnlockedLevelIndex = this._currentLevelIndex;
                 }
-                this.audioService.play(AudioService.SUCCESS);
+                this._audioService.play(AudioService.SUCCESS);
             }
 
             this._screenTransitionRenderer.slideVertically(this._context, 800, ScreenTransitionRenderer.CLOSE, () => {

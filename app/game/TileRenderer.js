@@ -1,5 +1,5 @@
 import {TileType} from "./TileType";
-import {SpriteService} from "./SpriteService";
+import {SpriteService} from "./../SpriteService";
 
 export class TileRenderer {
     /**

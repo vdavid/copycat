@@ -17,13 +17,6 @@ export class Transition {
         this._deltaY = deltaY;
     }
 
-    get startDateTime() {
-        return this._startDateTime;
-    }
-    get duration() {
-        return this._duration;
-    }
-
     get isFinished() {
         return new Date() - this._startDateTime >= this._duration;
     }

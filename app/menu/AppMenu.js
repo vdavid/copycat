@@ -1,6 +1,6 @@
-import {SpriteService} from "./SpriteService";
-import {AudioService} from "./AudioService";
-import {KeyCodes} from "./KeyCodes";
+import {SpriteService} from "./../SpriteService";
+import {AudioService} from "./../AudioService";
+import {KeyCodes} from "./../KeyCodes";
 import {MainMenu} from "./MainMenu";
 
 export class AppMenu {

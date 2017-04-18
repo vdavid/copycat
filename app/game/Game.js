@@ -1,9 +1,9 @@
+import {AudioService} from "./../AudioService";
+import {SpriteService} from "./../SpriteService";
+import {KeyCodes} from "./../KeyCodes";
 import {TileRenderer} from "./TileRenderer";
-import {AudioService} from "./AudioService";
-import {SpriteService} from "./SpriteService";
 import {TileType} from "./TileType";
 import {Player} from "./Player";
-import {KeyCodes} from "./KeyCodes";
 
 export class Game {
     /**

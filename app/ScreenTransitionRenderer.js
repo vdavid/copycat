@@ -7,24 +7,27 @@ export class ScreenTransitionRenderer {
             let transitionStartDateTime = new Date();
             let initialHeight = (direction === ScreenTransitionRenderer.OPEN) ? context.canvas.height / 2 : 0;
             let finalHeight = (direction === ScreenTransitionRenderer.OPEN) ? -context.canvas.height / 2 : context.canvas.height / 2;
-            let currentHeight = (direction === ScreenTransitionRenderer.OPEN) ? context.canvas.height / 2 : 0;
 
-            animate();
+            loop();
 
-            function animate() {
+            function loop() {
                 let elapsedTime = new Date() - transitionStartDateTime;
                 if (elapsedTime < duration) {
                     backgroundRenderFunction();
-                    context.fillStyle = "black";
-                    context.fillRect(0, 0, context.canvas.width, currentHeight);
-                    context.fillRect(0, context.canvas.height, context.canvas.width, currentHeight * -1);
-                    currentHeight = easeInOutQuart(elapsedTime, initialHeight, finalHeight, duration);
-                    requestAnimationFrame(animate);
+                    ScreenTransitionRenderer._render(context, elapsedTime, initialHeight, finalHeight, duration);
+                    requestAnimationFrame(loop);
                 } else {
                     resolve();
                 }
             }
         });
+    }
+
+    static _render(context, elapsedTime, initialHeight, finalHeight, duration) {
+        context.fillStyle = "black";
+        let currentHeight = easeInOutQuart(elapsedTime, initialHeight, finalHeight, duration);
+        context.fillRect(0, 0, context.canvas.width, currentHeight);
+        context.fillRect(0, context.canvas.height, context.canvas.width, currentHeight * -1);
     }
 }
 

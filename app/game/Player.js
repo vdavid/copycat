@@ -1,7 +1,7 @@
 import {Effect} from "./Effect";
-import {SpriteService} from "./SpriteService";
-import {AudioService} from "./AudioService";
-import {KeyCodes} from "./KeyCodes";
+import {SpriteService} from "./../SpriteService";
+import {AudioService} from "./../AudioService";
+import {KeyCodes} from "./../KeyCodes";
 import {TileType} from "./TileType";
 import {Transition} from "./Transition";
 

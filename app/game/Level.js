@@ -1,15 +1,15 @@
 import {TileType} from "./TileType";
 
 export class Level {
-    constructor(name, rawTileTypes, comment) {
-        this._name = name;
+    constructor(rawTileTypes, comment) {
+        //this._title = title;
         this._tiles = getTiles(rawTileTypes);
         this._spriteIndexes = getSpriteIndexes(rawTileTypes);
         this._comment = comment;
     }
 
     static createFromData(levelData) {
-        return new Level(levelData.name, levelData.tiles, levelData.comment)
+        return new Level(/* levelData.title, */ levelData.tiles, levelData.comment)
     }
 
     get width() {
