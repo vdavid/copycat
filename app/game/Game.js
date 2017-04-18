@@ -4,6 +4,7 @@ import KeyCodes from "./../KeyCodes";
 import TileRenderer from "./TileRenderer";
 import TileType from "./TileType";
 import Player from "./Player";
+import GameLoop from './GameLoop';
 
 /**
  * @member {Effect[]} Game#_effects
@@ -26,24 +27,28 @@ export default class Game {
         this._finishGameCallback = finishGameCallback;
         this._tileRenderer = new TileRenderer(tileSize, spriteService);
         this._effects = [];
-        this._isRunning = false;
+        this._pressedKeys = [];
+        this._gameLoop = new GameLoop()
+            .setBeginFunction(() => this._players.forEach(player => player.control(this._pressedKeys)))
+            .setUpdateFunction(() => this._players.forEach(player => player.update()))
+            .setDrawFunction(() => this._render());
         this.level = level;
     }
 
     handleKeyDownEvent(keyCode) {
-        if (keyCode === KeyCodes.E) { /* Returns to main menu */
-            this._audioService.play(AudioService.VALIDATION);
-            cancelAnimationFrame(this._lastRequestedAnimationFrame);
-            this._isRunning = false;
-            this._finishGameCallback(false, false);
+        if(this._gameLoop.isRunning()) {
+            if (keyCode === KeyCodes.E) { /* Returns to main menu */
+                this._audioService.play(AudioService.VALIDATION);
+                this._gameLoop.stop();
+                this._finishGameCallback(false, false);
+            }
+            if (keyCode === KeyCodes.R) { /* Restarts same level */
+                this._audioService.play(AudioService.VALIDATION);
+                this._gameLoop.stop();
+                this._finishGameCallback(false, true);
+            }
+            this._pressedKeys[keyCode] = true;
         }
-        if (keyCode === KeyCodes.R) { /* Restarts same level */
-            this._audioService.play(AudioService.VALIDATION);
-            cancelAnimationFrame(this._lastRequestedAnimationFrame);
-            this._isRunning = false;
-            this._finishGameCallback(false, true);
-        }
-        this._pressedKeys[keyCode] = true;
     }
 
     handleKeyUpEvent(keyCode) {
@@ -69,7 +74,6 @@ export default class Game {
 
     start() {
         this._players = [];
-        this._pressedKeys = [];
         let playerStartPositions = this._level.findAllTilesOfType(TileType.START);
         for (let i = 0; i < playerStartPositions.length; i++) {
             this._players.push(new Player(this._level, this._effects,
@@ -79,24 +83,9 @@ export default class Game {
                 }));
         }
 
+        this._pressedKeys = [];
         this._isRunning = true;
-        this._gameLoop();
-    }
-
-    _gameLoop() {
-        /* Updates player(s) */
-        this._players.forEach(player => {
-            player.update();
-            player.control(this._pressedKeys);
-        });
-
-        /* Renders player(s) */
-        this._render();
-
-        /* Queues next frame until stopped */
-        if (this._isRunning) {
-            this._lastRequestedAnimationFrame = requestAnimationFrame(() => this._gameLoop());
-        }
+        this._gameLoop.start();
     }
 
     _render() {
@@ -122,8 +111,7 @@ export default class Game {
         if (this._players.every(player => {
                 return player.hasReachedAnExit;
             })) {
-            cancelAnimationFrame(this._lastRequestedAnimationFrame);
-            this._isRunning = false;
+            this._gameLoop.stop();
             this._finishGameCallback(true, false);
         }
     }
