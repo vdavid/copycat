@@ -1,4 +1,4 @@
-export class SpriteService {
+export default class SpriteService {
     constructor(context) {
         this._sheets = {};
         this._context = context;

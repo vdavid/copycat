@@ -1,4 +1,4 @@
-export class Transition {
+export default class Transition {
     /**
      *
      * @param {Symbol} style One of the constants in this class.

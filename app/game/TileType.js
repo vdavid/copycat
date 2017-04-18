@@ -1,4 +1,4 @@
-export class TileType {
+export default class TileType {
     static isAccessible(tileTypeId) {
         return tileTypes[tileTypeId].isAccessible;
     }

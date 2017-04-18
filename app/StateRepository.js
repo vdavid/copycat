@@ -1,4 +1,4 @@
-export class StateRepository {
+export default class StateRepository {
     static getLastLevelIndex(defaultLevel) {
         if (!localStorage['copycat']) {
             StateRepository.setLastLevelIndex(defaultLevel);

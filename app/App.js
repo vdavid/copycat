@@ -1,14 +1,14 @@
-import {AudioService} from "./AudioService";
-import {SpriteService} from "./SpriteService";
-import {KeyCodes} from "./KeyCodes";
-import {Level} from "./game/Level";
-import {Game} from "./game/Game";
-import {AppMenu} from "./menu/AppMenu";
-import {ScreenTransitionRenderer} from "./ScreenTransitionRenderer";
-import {StateRepository} from "./StateRepository";
-import {ResourceLoader} from "./ResourceLoader";
+import AudioService from "./AudioService";
+import SpriteService from "./SpriteService";
+import KeyCodes from "./KeyCodes";
+import Level from "./game/Level";
+import Game from "./game/Game";
+import AppMenu from "./menu/AppMenu";
+import ScreenTransitionRenderer from "./ScreenTransitionRenderer";
+import StateRepository from "./StateRepository";
+import ResourceLoader from "./ResourceLoader";
 
-export class App {
+export default class App {
     constructor(rawLevels, tileSize, zoom) {
         this._zoom = zoom || 2;
         this._tileSize = tileSize;

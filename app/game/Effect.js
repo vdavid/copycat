@@ -1,4 +1,4 @@
-export class Effect {
+export default class Effect {
     /**
      *
      * @param {Array} effects

@@ -1,16 +1,16 @@
-import {Effect} from "./Effect";
-import {SpriteService} from "./../SpriteService";
-import {AudioService} from "./../AudioService";
-import {KeyCodes} from "./../KeyCodes";
-import {TileType} from "./TileType";
-import {Transition} from "./Transition";
+import Effect from "./Effect";
+import SpriteService from "./../SpriteService";
+import AudioService from "./../AudioService";
+import KeyCodes from "./../KeyCodes";
+import TileType from "./TileType";
+import Transition from "./Transition";
 
 const DIRECTION_UP = Symbol('DIRECTION_UP');
 const DIRECTION_DOWN = Symbol('DIRECTION_DOWN');
 const DIRECTION_LEFT = Symbol('DIRECTION_LEFT');
 const DIRECTION_RIGHT = Symbol('DIRECTION_RIGHT');
 
-export class Player {
+export default class Player {
     /**
      * @param level
      * @param effects

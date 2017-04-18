@@ -1,4 +1,4 @@
-export class ScreenTransitionRenderer {
+export default class ScreenTransitionRenderer {
     constructor() {
     }
 

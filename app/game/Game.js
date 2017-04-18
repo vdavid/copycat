@@ -1,11 +1,15 @@
-import {AudioService} from "./../AudioService";
-import {SpriteService} from "./../SpriteService";
-import {KeyCodes} from "./../KeyCodes";
-import {TileRenderer} from "./TileRenderer";
-import {TileType} from "./TileType";
-import {Player} from "./Player";
+import AudioService from "./../AudioService";
+import SpriteService from "./../SpriteService";
+import KeyCodes from "./../KeyCodes";
+import TileRenderer from "./TileRenderer";
+import TileType from "./TileType";
+import Player from "./Player";
 
-export class Game {
+/**
+ * @member {Effect[]} Game#_effects
+ * @member {Player[]} Game#_players
+ */
+export default class Game {
     /**
      *
      * @param {CanvasRenderingContext2D} context

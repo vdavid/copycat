@@ -1,12 +1,14 @@
-export const KeyCodes = {
-    SPACE: 32,
-    UP: 38,
-    DOWN: 40,
-    LEFT: 37,
-    RIGHT: 39,
-    C: 67,
-    E: 69,
-    F: 70,
-    R: 82,
-    X: 88
+export default class KeyCodes {
+
 };
+
+KeyCodes.SPACE = 32;
+KeyCodes.UP = 38;
+KeyCodes.DOWN = 40;
+KeyCodes.LEFT = 37;
+KeyCodes.RIGHT = 39;
+KeyCodes.C = 67;
+KeyCodes.E = 69;
+KeyCodes.F = 70;
+KeyCodes.R = 82;
+KeyCodes.X = 88;

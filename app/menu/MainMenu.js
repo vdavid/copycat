@@ -1,8 +1,8 @@
-import {KeyCodes} from "./../KeyCodes";
-import {AudioService} from "./../AudioService";
-import {SpriteService} from "./../SpriteService";
+import KeyCodes from "./../KeyCodes";
+import AudioService from "./../AudioService";
+import SpriteService from "./../SpriteService";
 
-export class MainMenu {
+export default class MainMenu {
     constructor(context, centerX, centerY, menuItems, audioService, spriteService) {
         this._context = context;
         this._menuItems = menuItems;

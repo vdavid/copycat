@@ -1,7 +1,7 @@
-import {TileType} from "./TileType";
-import {SpriteService} from "./../SpriteService";
+import SpriteService from "./../SpriteService";
+import TileType from "./TileType";
 
-export class TileRenderer {
+export default class TileRenderer {
     /**
      * @param {number} tileSizeInPixels
      * @param {SpriteService} spriteService

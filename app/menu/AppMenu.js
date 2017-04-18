@@ -1,9 +1,9 @@
-import {SpriteService} from "./../SpriteService";
-import {AudioService} from "./../AudioService";
-import {KeyCodes} from "./../KeyCodes";
-import {MainMenu} from "./MainMenu";
+import AudioService from "./../AudioService";
+import SpriteService from "./../SpriteService";
+import KeyCodes from "./../KeyCodes";
+import MainMenu from "./MainMenu";
 
-export class AppMenu {
+export default class AppMenu {
     constructor(context, levelCount, lastUnlockedLevelIndex, spriteService, audioService) {
         this._context = context;
         this._levelCount = levelCount;

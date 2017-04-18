@@ -1,6 +1,6 @@
-import {App} from "./App";
+import App from "./App";
 import {rawLevels} from "./data/rawLevels";
-import {KeyCodes} from "./KeyCodes";
+import KeyCodes from "./KeyCodes";
 //noinspection ES6UnusedImports,JSUnresolvedVariable
 import css from "./copycat.css";
 

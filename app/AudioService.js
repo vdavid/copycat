@@ -1,4 +1,4 @@
-export class AudioService {
+export default class AudioService {
     /**
      * @param {Number} masterVolume A value from 0 to 1.
      */

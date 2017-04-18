@@ -1,7 +1,7 @@
-import {AudioService} from "./AudioService";
-import {SpriteService} from "./SpriteService";
+import SpriteService from "./SpriteService";
+import AudioService from "./AudioService";
 
-export class ResourceLoader {
+export default class ResourceLoader {
     constructor(context, audioService, spriteService, callbackWhenFinished) {
         this._context = context;
         this._audioService = audioService;

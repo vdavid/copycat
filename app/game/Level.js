@@ -1,6 +1,6 @@
-import {TileType} from "./TileType";
+import TileType from "./TileType";
 
-export class Level {
+export default class Level {
     constructor(rawTileTypes, comment) {
         //this._title = title;
         this._tiles = getTiles(rawTileTypes);
