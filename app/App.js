@@ -6,6 +6,7 @@ import {Game} from "./game/Game";
 import {AppMenu} from "./menu/AppMenu";
 import {ScreenTransitionRenderer} from "./ScreenTransitionRenderer";
 import {StateRepository} from "./StateRepository";
+import {ResourceLoader} from "./ResourceLoader";
 
 export class App {
     constructor(rawLevels, tileSize, zoom) {
@@ -22,7 +23,6 @@ export class App {
         this._context = createCanvas(tileSize, zoom);
 
         /* Loads audio and image files */
-        this.loadedResourceCount = 0;
         this._audioService = new AudioService(0.05);
         this._spriteService = new SpriteService(this._context);
         this._screenTransitionRenderer = new ScreenTransitionRenderer();
@@ -30,32 +30,16 @@ export class App {
         this._appMenu = new AppMenu(this._context, this._rawLevels.length, StateRepository.getLastLevelIndex(5), this._spriteService, this._audioService);
         this._game = new Game(this._context, this.tileSize, Level.createFromData(this._rawLevels[0]),
             this._spriteService, this._audioService, (success, restart) => this.finishGame(success, restart));
+
+        let resourceLoader = new ResourceLoader(this._context, this._audioService, this._spriteService, () => this._handleLoadingFinished());
+        resourceLoader.loadResources();
+    }
+
+    _handleLoadingFinished() {
         document.addEventListener("keydown", event => this._handleKeyDownEvent(event.keyCode), false);
         document.addEventListener("keyup", event => this._game.handleKeyUpEvent(event.keyCode), false);
 
-        this._spriteService.loadResources(() => {
-            this.updateProgress();
-        });
-        this._audioService.loadResources(() => {
-            this.updateProgress();
-        });
-    }
-
-    updateProgress() {
-        this.loadedResourceCount += 1;
-        let totalResourceCount = SpriteService.getSupportedSpriteSheetCount() + AudioService.getSupportedSoundCount();
-        if (this.loadedResourceCount === totalResourceCount) {
-            this._appMenu.render();
-        } else {
-            this._renderLoadingScreen(this.loadedResourceCount / totalResourceCount);
-        }
-    }
-
-    _renderLoadingScreen(percent) {
-        this._context.fillStyle = "#000";
-        this._context.fillRect(0, 0, this._context.canvas.width, this._context.canvas.height);
-        this._context.fillStyle = "#fff";
-        this._context.fillRect(0, (this._context.canvas.height / 2) - 1, percent * this._context.canvas.width, 2);
+        this._appMenu.render();
     }
 
     /* Events */
@@ -94,8 +78,7 @@ export class App {
 
     startGame() {
         this.state = 'start';
-        this._game.level = new Level(this._rawLevels[this._currentLevelIndex].name,
-            this._rawLevels[this._currentLevelIndex].tiles, this._rawLevels[this._currentLevelIndex].comment);
+        this._game.level = Level.createFromData(this._rawLevels[this._currentLevelIndex]);
 
         this._screenTransitionRenderer.slideVertically(this._context, 800, ScreenTransitionRenderer.OPEN, () => this._game.renderTerrain())
             .then(() => this._game.start());
