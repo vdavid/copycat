@@ -5,11 +5,6 @@ import KeyCodes from "./../KeyCodes";
 import TileType from "./TileType";
 import Transition from "./Transition";
 
-const DIRECTION_UP = Symbol('DIRECTION_UP');
-const DIRECTION_DOWN = Symbol('DIRECTION_DOWN');
-const DIRECTION_LEFT = Symbol('DIRECTION_LEFT');
-const DIRECTION_RIGHT = Symbol('DIRECTION_RIGHT');
-
 export default class Player {
     /**
      * @param level
@@ -50,51 +45,46 @@ export default class Player {
         return this._hasReachedAnExit;
     }
 
-    control(buttons) {
-        if (!this._transition && this._canMove) {
-            if (buttons[KeyCodes.UP]) {
-                this._navigate(DIRECTION_UP);
+    control(pressedKeys) {
+        let keyCodeToDirectionMap = {
+            [KeyCodes.UP]: Player.DIRECTION_UP,
+            [KeyCodes.DOWN]: Player.DIRECTION_DOWN,
+            [KeyCodes.LEFT]: Player.DIRECTION_LEFT,
+            [KeyCodes.RIGHT]: Player.DIRECTION_RIGHT
+        };
+        pressedKeys.forEach((isPressed, keyCode) => {
+            if (isPressed && Object.keys(keyCodeToDirectionMap).indexOf(keyCode.toString()) > -1) {
+                this._navigate(keyCodeToDirectionMap[keyCode], true);
             }
-            if (buttons[KeyCodes.RIGHT]) {
-                this._navigate(DIRECTION_RIGHT);
-            }
-            if (buttons[KeyCodes.LEFT]) {
-                this._navigate(DIRECTION_LEFT);
-            }
-            if (buttons[KeyCodes.DOWN]) {
-                this._navigate(DIRECTION_DOWN);
-            }
-        }
+        });
     }
 
-    _navigate(direction) {
-        if (!this._transition) {
-            let deltaX = (direction === DIRECTION_LEFT) ? -1 : ((direction === DIRECTION_RIGHT) ? 1 : 0);
-            let deltaY = (direction === DIRECTION_UP) ? -1 : ((direction === DIRECTION_DOWN) ? 1 : 0);
-
+    _navigate(direction, isInitiatedByPlayer) {
+        isInitiatedByPlayer = (typeof isInitiatedByPlayer !== 'undefined') ? isInitiatedByPlayer : true;
+        if (!this._transition && (!isInitiatedByPlayer || this._canMove)) {
             this._collisionOccurred = true;
             this._targetTileAction = TileType.NO_ACTION;
-            if (this._isMovementValid(deltaX, deltaY)) {
-                this._collisionOccurred = !TileType.isAccessible(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
-                this._targetTileAction = TileType.getAction(this._level.getTileType(this._positionX + deltaX, this._positionY + deltaY));
+            if (this._isMovementInsideBounds(direction)) {
+                this._collisionOccurred = !TileType.isAccessible(this._level.getTileType(this._positionX + direction.x, this._positionY + direction.y));
+                this._targetTileAction = TileType.getAction(this._level.getTileType(this._positionX + direction.x, this._positionY + direction.y));
             }
 
 
             if (!this._collisionOccurred) {
                 this._transition = new Transition(
                     (this._targetTileAction === TileType.SLIDE_ACTION) ? Transition.STYLE_SLIDE : Transition.STYLE_WALK,
-                    this._positionX, this._positionY, deltaX, deltaY);
+                    this._positionX, this._positionY, direction.x, direction.y);
                 this._hasReachedAnExit = false;
                 this._lastDirection = direction;
-                this._positionX += deltaX;
-                this._positionY += deltaY;
+                this._positionX += direction.x;
+                this._positionY += direction.y;
             }
         }
     }
 
-    _isMovementValid(deltaX, deltaY) {
-        return this._positionX + deltaX >= 0 && this._positionX + deltaX < this._level.width
-            && this._positionY + deltaY >= 0 && this._positionY + deltaY < this._level.height;
+    _isMovementInsideBounds(direction) {
+        return this._positionX + direction.x >= 0 && this._positionX + direction.x < this._level.width
+            && this._positionY + direction.y >= 0 && this._positionY + direction.y < this._level.height;
     }
 
     update() {
@@ -106,12 +96,12 @@ export default class Player {
             if ([TileType.UP_ACTION, TileType.DOWN_ACTION, TileType.LEFT_ACTION, TileType.RIGHT_ACTION].indexOf(this._targetTileAction) > -1) {
                 this._audioService.play(AudioService.VALIDATION);
                 this._canMove = false;
-                this._navigate((this._targetTileAction === TileType.UP_ACTION) ? DIRECTION_UP
-                    : ((this._targetTileAction === TileType.DOWN_ACTION) ? DIRECTION_DOWN
-                        : ((this._targetTileAction === TileType.LEFT_ACTION) ? DIRECTION_LEFT : DIRECTION_RIGHT)));
+                this._navigate((this._targetTileAction === TileType.UP_ACTION) ? Player.DIRECTION_UP
+                    : ((this._targetTileAction === TileType.DOWN_ACTION) ? Player.DIRECTION_DOWN
+                        : ((this._targetTileAction === TileType.LEFT_ACTION) ? Player.DIRECTION_LEFT : Player.DIRECTION_RIGHT)), false);
 
             } else if (this._targetTileAction === TileType.SLIDE_ACTION) {
-                this._navigate(this._lastDirection);
+                this._navigate(this._lastDirection, false);
                 this._canMove = this._collisionOccurred;
 
             } else if (this._targetTileAction === TileType.TRAP_ACTION) {
@@ -142,3 +132,8 @@ export default class Player {
             Math.floor(this._animationFrame), 0);
     }
 }
+
+Player.DIRECTION_UP = {x: 0, y: -1};
+Player.DIRECTION_DOWN = {x: 0, y: 1};
+Player.DIRECTION_LEFT = {x: -1, y: 0};
+Player.DIRECTION_RIGHT = {x: 1, y: 0};

@@ -25,7 +25,6 @@ export default class Game {
         this._audioService = audioService;
         this._finishGameCallback = finishGameCallback;
         this._tileRenderer = new TileRenderer(tileSize, spriteService);
-        this._buttons = [];
         this._effects = [];
         this._isRunning = false;
         this.level = level;
@@ -44,11 +43,11 @@ export default class Game {
             this._isRunning = false;
             this._finishGameCallback(false, true);
         }
-        this._buttons[keyCode] = true;
+        this._pressedKeys[keyCode] = true;
     }
 
     handleKeyUpEvent(keyCode) {
-        this._buttons[keyCode] = false;
+        this._pressedKeys[keyCode] = false;
     }
 
     /**
@@ -70,6 +69,7 @@ export default class Game {
 
     start() {
         this._players = [];
+        this._pressedKeys = [];
         let playerStartPositions = this._level.findAllTilesOfType(TileType.START);
         for (let i = 0; i < playerStartPositions.length; i++) {
             this._players.push(new Player(this._level, this._effects,
@@ -87,7 +87,7 @@ export default class Game {
         /* Updates player(s) */
         this._players.forEach(player => {
             player.update();
-            player.control(this._buttons);
+            player.control(this._pressedKeys);
         });
 
         /* Renders player(s) */

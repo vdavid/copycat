@@ -1,5 +1,4 @@
 export default class KeyCodes {
-
 };
 
 KeyCodes.SPACE = 32;

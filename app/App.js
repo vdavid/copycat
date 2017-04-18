@@ -17,7 +17,6 @@ export default class App {
         this._currentLevelIndex = 0;
         this._isFullScreen = false;
         this._state = App.STATE_MENU;
-        // Frames per second: this.fps = 60;
 
         /* Initializes HTML canvas */
         this._context = createCanvas(tileSize, zoom);
