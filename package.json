@@ -1,10 +1,11 @@
 {
   "name": "copycat",
   "version": "1.0.0",
-  "description": "",
+  "description": "A refactory project.",
+  "repository" : { "type" : "git", "url" : "https://github.com/vdavid/copycat.git" },
   "main": "copycat.js",
   "dependencies": {
-    "webpack": "2.3.3"
+    "webpack": "^2.4.1"
   },
   "devDependencies": {
     "css-loader": "0.28.0",
