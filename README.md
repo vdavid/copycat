@@ -1,7 +1,14 @@
-# copycat
+# About
+
 A fork of Gtibo's game on Codepen (https://codepen.io/Gthibaud/pen/ryQRYP).
 
 This was a refactoring project. This version of the game is meant to work 100% like the original one.
+
+## How to use
+
+* Clone the repo
+* Issue `npm install`
+* Start the app with `./node_modules/.bin/webpack`
 
 ## Key differences
 
