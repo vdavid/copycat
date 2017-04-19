@@ -26,7 +26,7 @@ I am at this point satisfied with the refactor.
 
 ## Thanks
 
-A big thanks to Gitbo for the original game, it's a great idea and implementation. I hope you find my refactor interesting and/or useful. :)
+A big thanks to Gtibo for the original game, it's a great idea and implementation. I hope you find my refactor interesting and/or useful. :)
 
 ## Plans
 
